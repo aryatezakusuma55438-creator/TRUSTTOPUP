@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Contact - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+.contact-wrap { max-width: 680px; margin: 0 auto; padding: 100px 16px 60px; }
+.contact-hero { background: linear-gradient(135deg, rgba(var(--purple-rgb),0.15), rgba(var(--cyan-rgb),0.08)); border: 1px solid rgba(var(--purple-rgb),0.3); border-radius: 24px; padding: 32px 24px; margin-bottom: 24px; text-align: center; }
+.contact-title { font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 900; color: #fff; margin-bottom: 8px; }
+.contact-sub { color: rgba(255,255,255,0.5); font-size: 0.92rem; }
+.contact-card { background: var(--card-bg); border: 1px solid rgba(var(--purple-rgb),0.18); border-radius: 18px; padding: 22px; margin-bottom: 16px; }
+.contact-card h2 { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--purple-glow); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.contact-item { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.contact-item:last-child { margin-bottom: 0; }
+.contact-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(var(--purple-rgb),0.15); border: 1px solid rgba(var(--purple-rgb),0.25); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.contact-info { flex: 1; }
+.contact-label { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-bottom: 3px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
+.contact-value { font-size: 0.92rem; color: #fff; font-weight: 600; }
+.contact-value a { color: var(--purple-glow); text-decoration: none; }
+.contact-value a:hover { text-decoration: underline; }
+.hours-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem; }
+.hours-row:last-child { border-bottom: none; }
+.hours-day { color: rgba(255,255,255,0.55); }
+.hours-time { color: var(--cyan); font-weight: 700; font-family: 'Rajdhani', sans-serif; }
+.online-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; color: #4ade80; margin-bottom: 14px; }
+.online-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">{{ t('nav_home') }}</a>
+      <a href="{{ url_for('game') }}">{{ t('nav_games') }}</a>
+      <a href="{{ url_for('reting') }}">{{ t('nav_rating') }}</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">{{ t('nav_status') }}</a>
+      <a href="{{ url_for('kritik') }}">{{ t('nav_critique') }}</a>
+      <a href="{{ url_for('saran') }}">{{ t('nav_suggestion') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">{{ t('nav_logout') }}</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+  <div class="contact-wrap">
+    <div class="contact-hero">
+      <div class="contact-title">{{ t('contact_title') }}</div>
+      <div class="contact-sub">{{ t('contact_hero_sub') }}</div>
+    </div>
+
+    <div class="contact-card">
+      <h2>{{ t('contact_service_status') }}</h2>
+      <div class="online-badge"><div class="online-dot"></div> {{ t('contact_systems_normal') }}</div>
+      <p style="color:rgba(255,255,255,0.5);font-size:0.87rem;">{{ t('contact_status_desc') }}</p>
+    </div>
+
+    <div class="contact-card">
+      <h2>{{ t('contact_channels') }}</h2>
+      <div class="contact-item">
+        <div class="contact-icon">&#9993;</div>
+        <div class="contact-info">
+          <div class="contact-label">{{ t('contact_email_support') }}</div>
+          <div class="contact-value"><a href="mailto:trusttopup.id@gmail.com">trusttopup.id@gmail.com</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">&#9742;</div>
+        <div class="contact-info">
+          <div class="contact-label">{{ t('contact_whatsapp') }}</div>
+          <div class="contact-value"><a href="https://wa.me/6282258185709" target="_blank">0822-5818-5709</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">&#9888;</div>
+        <div class="contact-info">
+          <div class="contact-label">{{ t('contact_report_issue') }}</div>
+          <div class="contact-value"><a href="{{ url_for('report') }}">{{ t('contact_report_click') }}</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <h2>{{ t('contact_hours') }}</h2>
+      <div class="hours-row">
+        <span class="hours-day">{{ t('contact_hours_weekday') }}</span>
+        <span class="hours-time">08:00 - 22:00 WIB</span>
+      </div>
+      <div class="hours-row">
+        <span class="hours-day">{{ t('contact_hours_weekend') }}</span>
+        <span class="hours-time">09:00 - 21:00 WIB</span>
+      </div>
+      <div class="hours-row">
+        <span class="hours-day">{{ t('contact_hours_holiday') }}</span>
+        <span class="hours-time">10:00 - 18:00 WIB</span>
+      </div>
+      <p style="color:rgba(255,255,255,0.35);font-size:0.8rem;margin-top:12px;">{{ t('contact_hours_note') }}</p>
+    </div>
+
+    <div class="contact-card">
+      <h2>{{ t('contact_before_title') }}</h2>
+      <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;line-height:1.7;">{{ t('contact_before_desc') }}</p>
+      <p style="color:rgba(255,255,255,0.55);font-size:0.87rem;">&#10003; &nbsp;{{ t('contact_before_1') }}</p>
+      <p style="color:rgba(255,255,255,0.55);font-size:0.87rem;">&#10003; &nbsp;{{ t('contact_before_2') }}</p>
+      <p style="color:rgba(255,255,255,0.55);font-size:0.87rem;">&#10003; &nbsp;{{ t('contact_before_3') }}</p>
+      <p style="color:rgba(255,255,255,0.55);font-size:0.87rem;">&#10003; &nbsp;{{ t('contact_before_4') }}</p>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; {{ t('back_to_home') }}</a>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()">&#10005;</button>
+    <div class="modal-title">{{ t('nav_donate') }}</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">{{ t('reting_donate_desc') }}</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">{{ t('btn_close') }}</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+function toggleMenu(){const m=document.getElementById('dotsMenu');if(m)m.classList.toggle('open');}
+function openDonate(e){if(e)e.preventDefault();const d=document.getElementById('donate-modal');if(d)d.classList.add('open');}
+function closeDonate(){const d=document.getElementById('donate-modal');if(d)d.classList.remove('open');}
+document.addEventListener('click',(e)=>{const menu=document.getElementById('dotsMenu');const btn=document.getElementById('dotsBtn');if(menu&&btn&&!menu.contains(e.target)&&e.target!==btn)menu.classList.remove('open');});
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

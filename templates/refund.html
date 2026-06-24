@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refund Policy - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+.policy-wrap{max-width:720px;margin:0 auto;padding:100px 16px 60px;}
+.policy-hero{background:linear-gradient(135deg,rgba(var(--purple-rgb),0.15),rgba(var(--cyan-rgb),0.08));border:1px solid rgba(var(--purple-rgb),0.3);border-radius:24px;padding:32px 24px;margin-bottom:24px;text-align:center;}
+.policy-title{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:8px;}
+.policy-sub{color:rgba(255,255,255,0.45);font-size:0.85rem;}
+.policy-card{background:var(--card-bg);border:1px solid rgba(var(--purple-rgb),0.18);border-radius:18px;padding:22px;margin-bottom:16px;}
+.policy-card h2{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--purple-glow);margin-bottom:10px;}
+.policy-card p,.policy-card li{color:rgba(255,255,255,0.6);font-size:0.9rem;line-height:1.75;margin-bottom:6px;}
+.policy-card ul{padding-left:18px;margin-top:6px;}
+.policy-card li{margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">Home</a>
+      <a href="{{ url_for('game') }}">Games</a>
+      <a href="{{ url_for('reting') }}">Ratings</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">Order Status</a>
+      <a href="{{ url_for('kritik') }}">Kritik</a>
+      <a href="{{ url_for('saran') }}">Saran</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">Donate</a>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">Logout</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">Donate</a>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+
+{% if current_lang == 'id' %}
+    <div class="policy-wrap">
+    <div class="policy-hero">
+      <div class="policy-title">Kebijakan Pengembalian Dana</div>
+      <div class="policy-sub">Terakhir diperbarui: Juni 2026 &nbsp;|&nbsp; Mohon dibaca sebelum melakukan transaksi.</div>
+    </div>
+
+    <div class="policy-card">
+      <h2>Ikhtisar</h2>
+      <p>Di TrustTop Up, kami berkomitmen untuk memastikan semua transaksi ditangani dengan benar, adil, dan transparan. Kami memahami bahwa masalah terkadang bisa terjadi, dan kebijakan ini menjelaskan kondisi di mana pengembalian dana dapat diminta dan diproses.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>1. Kelayakan Pengembalian Dana</h2>
+      <p>Pengembalian dana dapat dipertimbangkan dalam kondisi berikut:</p>
+      <ul>
+        <li>Pesanan sudah dibayar tetapi belum diproses oleh sistem kami</li>
+        <li>Terjadi error sistem yang terverifikasi di pihak TrustTop Up yang mencegah pengiriman</li>
+        <li>Terdeteksi pembayaran duplikat untuk pesanan yang sama</li>
+        <li>Top up terkirim ke akun yang salah karena kesalahan di pihak kami</li>
+      </ul>
+      <p>Semua permintaan pengembalian dana harus diajukan dalam 7 hari sejak tanggal transaksi awal.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>2. Kasus yang Tidak Dapat Dikembalikan</h2>
+      <p>Pengembalian dana TIDAK akan diberikan dalam situasi berikut:</p>
+      <ul>
+        <li>User ID, Server ID, atau informasi game lainnya yang salah dimasukkan oleh customer</li>
+        <li>Pesanan yang sudah berhasil terkirim ke akun yang ditentukan</li>
+        <li>Berubah pikiran setelah transaksi selesai</li>
+        <li>Kesalahan customer selama proses checkout</li>
+        <li>Keterlambatan yang disebabkan oleh server penyedia game, bukan oleh TrustTop Up</li>
+        <li>Pemblokiran atau pembatasan akun yang dikenakan oleh penyedia game setelah pengiriman</li>
+      </ul>
+    </div>
+
+    <div class="policy-card">
+      <h2>3. Cara Mengajukan Pengembalian Dana</h2>
+      <p>Untuk mengajukan pengembalian dana, silakan hubungi tim dukungan kami dengan informasi berikut:</p>
+      <ul>
+        <li>Order ID kamu</li>
+        <li>Screenshot atau bukti pembayaran</li>
+        <li>Deskripsi singkat masalahnya</li>
+      </ul>
+      <p>Hubungi kami via WhatsApp di <strong style="color:var(--purple-glow);">0822-5818-5709</strong> atau email di <strong style="color:var(--purple-glow);">support@trusttopup.com</strong>. Tim kami akan meninjau permintaan kamu dan merespons dalam 1 hari kerja.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>4. Waktu Proses Pengembalian Dana</h2>
+      <p>Setelah pengembalian dana disetujui, akan diproses dalam 1-3 hari kerja tergantung metode pembayaran kamu:</p>
+      <ul>
+        <li>E-wallet (GoPay, OVO, Dana): 1 hari kerja</li>
+        <li>Transfer bank: 1-3 hari kerja</li>
+        <li>Pembayaran minimarket (Indomaret/Alfamart): 3-5 hari kerja</li>
+      </ul>
+      <p>Pengembalian dana akan dikembalikan ke metode pembayaran asli yang digunakan saat transaksi.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>5. Penyelesaian Perselisihan</h2>
+      <p>Jika kamu merasa permintaan pengembalian dana kamu ditolak secara tidak adil, kamu dapat meningkatkan masalah ini dengan menghubungi tim dukungan kami dan meminta tinjauan manual. Kami berkomitmen untuk menyelesaikan semua perselisihan secara adil dan transparan. Keputusan final TrustTop Up mengenai perselisihan pengembalian dana akan dianggap mengikat.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>6. Perubahan Kebijakan</h2>
+      <p>TrustTop Up berhak untuk memperbarui atau mengubah Kebijakan Pengembalian Dana ini kapan saja. Setiap perubahan akan dicantumkan di halaman ini dengan tanggal yang diperbarui. Penggunaan layanan kami yang berkelanjutan setelah perubahan dibuat merupakan persetujuan kamu terhadap kebijakan yang direvisi.</p>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; Kembali ke Beranda</a>
+    </div>
+  </div>
+{% else %}
+  <div class="policy-wrap">
+    <div class="policy-hero">
+      <div class="policy-title">Refund Policy</div>
+      <div class="policy-sub">Last updated: June 2026 &nbsp;|&nbsp; Please read before making a transaction.</div>
+    </div>
+
+    <div class="policy-card">
+      <h2>Overview</h2>
+      <p>At TrustTop Up, we are committed to ensuring that all transactions are handled correctly, fairly, and transparently. We understand that issues may occasionally arise, and this policy outlines the conditions under which refunds may be requested and processed.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>1. Refund Eligibility</h2>
+      <p>A refund may be considered under the following circumstances:</p>
+      <ul>
+        <li>The order has been paid but has not yet been processed by our system</li>
+        <li>A verified system error occurred on TrustTop Up's side that prevented delivery</li>
+        <li>A duplicate payment was detected for the same order</li>
+        <li>The top-up was delivered to the wrong account due to an error on our side</li>
+      </ul>
+      <p>All refund requests must be submitted within 7 days of the original transaction date.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>2. Non-Refundable Cases</h2>
+      <p>Refunds will NOT be issued in the following situations:</p>
+      <ul>
+        <li>Incorrect User ID, Server ID, or any game information entered by the customer</li>
+        <li>Orders that have already been successfully delivered to the specified account</li>
+        <li>Change of mind after a completed transaction</li>
+        <li>Customer error during the checkout process</li>
+        <li>Delays caused by the game provider's server, not by TrustTop Up</li>
+        <li>Account bans or restrictions imposed by the game provider after delivery</li>
+      </ul>
+    </div>
+
+    <div class="policy-card">
+      <h2>3. How to Request a Refund</h2>
+      <p>To request a refund, please contact our support team with the following information:</p>
+      <ul>
+        <li>Your Order ID</li>
+        <li>Screenshot or proof of payment</li>
+        <li>A brief description of the issue</li>
+      </ul>
+      <p>Contact us via WhatsApp at <strong style="color:var(--purple-glow);">0822-5818-5709</strong> or email at <strong style="color:var(--purple-glow);">support@trusttopup.com</strong>. Our team will review your request and respond within 1 business day.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>4. Refund Processing Time</h2>
+      <p>Once a refund has been approved, it will be processed within 1–3 business days depending on your payment method:</p>
+      <ul>
+        <li>E-wallet (GoPay, OVO, Dana): 1 business day</li>
+        <li>Bank transfer: 1–3 business days</li>
+        <li>Convenience store payment (Indomaret/Alfamart): 3–5 business days</li>
+      </ul>
+      <p>Refunds will be returned to the original payment method used during the transaction.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>5. Dispute Resolution</h2>
+      <p>If you believe your refund request was unfairly denied, you may escalate the matter by contacting our support team and requesting a manual review. We are committed to resolving all disputes in a fair and transparent manner. TrustTop Up's final decision on refund disputes shall be considered binding.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>6. Policy Updates</h2>
+      <p>TrustTop Up reserves the right to update or modify this Refund Policy at any time. Any changes will be reflected on this page with the updated date. Continued use of our services after changes are made constitutes your acceptance of the revised policy.</p>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()"></button>
+    <div class="modal-title">Donate</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">Your donation means a lot to us. Thank you!</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">Close</button>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+function toggleMenu(){const m=document.getElementById('dotsMenu');if(m)m.classList.toggle('open');}
+function openDonate(e){if(e)e.preventDefault();const d=document.getElementById('donate-modal');if(d)d.classList.add('open');}
+function closeDonate(){const d=document.getElementById('donate-modal');if(d)d.classList.remove('open');}
+document.addEventListener('click',(e)=>{const menu=document.getElementById('dotsMenu');const btn=document.getElementById('dotsBtn');if(menu&&btn&&!menu.contains(e.target)&&e.target!==btn)menu.classList.remove('open');});
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

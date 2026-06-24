@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Games - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+</head>
+<body>
+{% include '_pending_banner.html' %}
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">{{ t('nav_home') }}</a>
+      <a href="{{ url_for('game') }}">{{ t('nav_games') }}</a>
+      <a href="{{ url_for('reting') }}">{{ t('nav_rating') }}</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">{{ t('nav_status') }}</a>
+      <a href="{{ url_for('kritik') }}">{{ t('nav_critique') }}</a>
+      <a href="{{ url_for('saran') }}">{{ t('nav_suggestion') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">{{ t('nav_logout') }}</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+  <section class="section" style="padding-top:120px;" id="games-section">
+    <div class="section-title">{{ t('all_games') }}</div>
+    <div class="section-sub">{{ t('choose_game_sub') }}</div>
+    <div class="games-grid">
+      {% for game in games %}
+      <a href="{{ url_for('topup_page', slug=game.slug) }}" class="game-card" style="text-decoration:none;">
+        {% if game.badge %}<div class="popular-badge">{{ game.badge }}</div>{% endif %}
+        <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}"
+             style="width:80px;height:80px;object-fit:cover;border-radius:12px;margin-bottom:12px;"
+             onerror="this.style.display='none'">
+        <div class="game-name">{{ game.name }}</div>
+        <div class="game-price">{{ t('starting_from') }} {{ game.price }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <footer>
+    <div style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;margin-bottom:8px;">TrustTop Up</div>
+    <div>{{ t('footer_tagline') }}</div>
+    <div style="margin-top:8px;font-size:0.8rem;">&copy; 2026 {{ t('footer_copyright') }}</div>
+  </footer>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()">&#10005;</button>
+    <div class="modal-title">{{ t('nav_donate') }}</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">{{ t('donate_thanks') }}</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.6;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">{{ t('btn_close') }}</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

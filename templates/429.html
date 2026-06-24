@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>429 - Too Many Requests</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; text-align:center; }
+  .err-box { padding:48px 32px; }
+  .err-code { font-family:'Orbitron',monospace; font-size:5rem; color:#ef4444; font-weight:900; line-height:1; }
+  .err-title { font-size:1.4rem; color:#fff; margin:16px 0 8px; font-weight:700; }
+  .err-sub { color:rgba(255,255,255,0.5); font-size:0.95rem; line-height:1.7; }
+  .btn-back { display:inline-block; margin-top:28px; padding:12px 32px; background:rgba(var(--purple-rgb),0.3);
+    border:1px solid rgba(var(--purple-rgb),0.5); color:var(--purple-glow); border-radius:12px;
+    text-decoration:none; font-weight:700; transition:all 0.2s; }
+  .btn-back:hover { background:rgba(var(--purple-rgb),0.5); }
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  <div class="err-box">
+    <div class="err-code">429</div>
+    <div class="err-title">Too Many Requests</div>
+    <div class="err-sub">
+      You've sent too many requests in a short period of time.<br>
+      Your IP has been temporarily blocked for 5 minutes.<br><br>
+      Please wait a moment and try again.
+    </div>
+    <a href="/" class="btn-back">Back to Home</a>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

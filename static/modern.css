@@ -1,0 +1,205 @@
+/* ==========================================================================
+   modern.css — Futuristic / Premium / Glassmorphism Gaming Theme
+   Scoped entirely under body.theme-modern so it never affects the default
+   look unless explicitly activated by theme-switcher.js
+   ========================================================================== */
+
+body.theme-modern {
+  --m-bg1: #050816;
+  --m-bg2: #08102E;
+  --m-bg3: #101A4D;
+  --m-neon: #8B5CF6;
+  --m-neon2: #06B6D4;
+  --m-text: #F1F5F9;
+  --m-text-muted: rgba(241,245,249,.55);
+  --m-glass: rgba(255,255,255,.05);
+  --m-glass-border: rgba(255,255,255,.12);
+
+  background: radial-gradient(circle at 20% 0%, var(--m-bg3) 0%, var(--m-bg2) 45%, var(--m-bg1) 100%) !important;
+  color: var(--m-text) !important;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated blur orbs in the background */
+body.theme-modern::before,
+body.theme-modern::after {
+  content: ''; position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none;
+  animation: ttOrbFloat 9s ease-in-out infinite;
+}
+body.theme-modern::before { width: 380px; height: 380px; top: -100px; left: -80px; background: rgba(139,92,246,.35); }
+body.theme-modern::after  { width: 420px; height: 420px; bottom: -120px; right: -100px; background: rgba(6,182,212,.3); animation-delay: 2s; }
+@keyframes ttOrbFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.08); } }
+
+body.theme-modern #main-site { position: relative; z-index: 1; }
+
+/* ---------- Navbar: glassmorphism, sticky, blur ---------- */
+body.theme-modern nav {
+  background: rgba(8,16,46,.55) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border-bottom: 1px solid var(--m-glass-border) !important;
+  position: sticky !important; top: 0; z-index: 200;
+}
+body.theme-modern .nav-search {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid var(--m-glass-border) !important;
+}
+body.theme-modern .nav-lang-pill, body.theme-modern .nav-hamburger, body.theme-modern .nav-search-toggle-btn {
+  border-color: var(--m-glass-border) !important; color: var(--m-text) !important;
+}
+body.theme-modern .dots-menu { background: rgba(8,16,46,.92) !important; backdrop-filter: blur(20px); }
+
+body.theme-modern .tt-theme-switcher { background: var(--m-glass); border: 1px solid var(--m-glass-border); }
+body.theme-modern .tt-theme-pill { color: var(--m-text-muted); }
+body.theme-modern .tt-theme-pill.active {
+  background: linear-gradient(90deg, var(--m-neon), var(--m-neon2)); color: #fff;
+  box-shadow: 0 0 14px rgba(139,92,246,.6);
+}
+
+/* ---------- Hero / Banner: premium glow + floating ---------- */
+body.theme-modern .banner-section { padding: 24px 16px 0 !important; }
+body.theme-modern .banner-slider {
+  border-radius: 20px !important; overflow: hidden;
+  border: 1px solid var(--m-glass-border);
+  box-shadow: 0 0 50px rgba(139,92,246,.25), 0 10px 40px rgba(0,0,0,.4);
+}
+body.theme-modern .banner-slide { background: linear-gradient(135deg, #1e1b4b, #312e81 60%, #0f172a) !important; }
+body.theme-modern .banner-btn {
+  background: linear-gradient(90deg, var(--m-neon), var(--m-neon2)) !important;
+  border: none !important; box-shadow: 0 0 18px rgba(139,92,246,.55);
+}
+body.theme-modern .banner-diamond { animation: float 3s ease-in-out infinite, ttGlowPulse 2.4s ease-in-out infinite; }
+@keyframes ttGlowPulse { 0%,100% { filter: drop-shadow(0 0 4px currentColor); } 50% { filter: drop-shadow(0 0 16px currentColor); } }
+body.theme-modern .banner-dot.active { background: var(--m-neon2) !important; box-shadow: 0 0 8px var(--m-neon2); }
+
+/* ---------- Section headers ---------- */
+body.theme-modern .section-title {
+  color: #fff !important; font-family: 'Orbitron', sans-serif !important; letter-spacing: .5px;
+  text-shadow: 0 0 18px rgba(139,92,246,.4);
+}
+body.theme-modern .section-sub { color: var(--m-text-muted) !important; }
+
+/* ---------- Featured / Popular list ---------- */
+body.theme-modern .featured-card {
+  background: var(--m-glass) !important; border: 1px solid var(--m-glass-border) !important;
+  backdrop-filter: blur(12px); border-radius: 18px !important;
+}
+body.theme-modern .featured-card:hover { box-shadow: 0 0 30px rgba(139,92,246,.35) !important; }
+body.theme-modern .popular-item { background: var(--m-glass) !important; border: 1px solid var(--m-glass-border) !important; border-radius: 14px !important; }
+
+/* ---------- Product cards: glass + gradient border + neon glow ---------- */
+body.theme-modern .games-grid { gap: 18px !important; }
+body.theme-modern .game-card {
+  position: relative !important;
+  background: var(--m-glass) !important;
+  border: 1px solid var(--m-glass-border) !important;
+  border-radius: 18px !important;
+  backdrop-filter: blur(10px);
+  overflow: hidden !important;
+  transition: transform .3s ease, box-shadow .3s ease !important;
+}
+body.theme-modern .game-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: 18px; padding: 1px;
+  background: linear-gradient(135deg, var(--m-neon), transparent 40%, var(--m-neon2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .3s ease; pointer-events: none; z-index: 2;
+}
+body.theme-modern .game-card:hover {
+  transform: translateY(-6px) scale(1.03) !important;
+  box-shadow: 0 0 28px rgba(139,92,246,.45), 0 14px 30px rgba(0,0,0,.5) !important;
+}
+body.theme-modern .game-card:hover::before { opacity: 1; }
+body.theme-modern .popular-badge { background: linear-gradient(90deg, var(--m-neon), var(--m-neon2)) !important; box-shadow: 0 0 10px rgba(139,92,246,.6); }
+body.theme-modern .cat-tab { background: var(--m-glass) !important; border: 1px solid var(--m-glass-border) !important; color: var(--m-text-muted) !important; }
+body.theme-modern .cat-tab.active {
+  background: linear-gradient(90deg, var(--m-neon), var(--m-neon2)) !important; color: #fff !important;
+  box-shadow: 0 0 14px rgba(139,92,246,.55);
+}
+body.theme-modern .cat-arrow { background: var(--m-glass) !important; border: 1px solid var(--m-glass-border) !important; color: #fff !important; }
+
+/* ---------- Popular This Week / Top Sellers carousels (mandatory feature) ---------- */
+body.theme-modern .tt-carousel { position: relative; padding: 6px 0; }
+body.theme-modern .tt-carousel-track {
+  display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory;
+  -ms-overflow-style: none; scrollbar-width: none; padding: 6px 4px 16px;
+  cursor: grab; will-change: scroll-position;
+}
+body.theme-modern .tt-carousel-track::-webkit-scrollbar { display: none; }
+body.theme-modern .tt-carousel-track:active { cursor: grabbing; }
+body.theme-modern .tt-car-card {
+  flex: 0 0 200px; scroll-snap-align: start; position: relative; display: block;
+  text-decoration: none; border-radius: 18px; overflow: hidden;
+  background: var(--m-glass); border: 1px solid var(--m-glass-border);
+  backdrop-filter: blur(10px);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, border-color .35s ease;
+}
+body.theme-modern .tt-car-card-seller { flex-basis: 170px; }
+body.theme-modern .tt-car-card:hover {
+  transform: translateY(-8px) scale(1.06);
+  box-shadow: 0 0 36px rgba(139,92,246,.55), 0 18px 30px rgba(0,0,0,.5);
+  border-color: rgba(139,92,246,.6);
+}
+body.theme-modern .tt-car-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+body.theme-modern .tt-car-card-seller img { height: 120px; }
+body.theme-modern .tt-car-info { padding: 12px; }
+body.theme-modern .tt-car-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.theme-modern .tt-car-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: .8rem; }
+body.theme-modern .tt-car-price { color: var(--m-neon2); font-weight: 700; }
+body.theme-modern .tt-car-rating { color: #FBBF24; }
+body.theme-modern .tt-car-badge {
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+  background: linear-gradient(90deg, #ef4444, #f59e0b); color: #fff; font-size: .65rem;
+  font-weight: 700; padding: 2px 9px; border-radius: 20px; box-shadow: 0 0 10px rgba(239,68,68,.5);
+}
+body.theme-modern .tt-car-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  background: var(--m-glass); border: 1px solid var(--m-glass-border);
+  backdrop-filter: blur(8px); color: #fff; font-size: 1.3rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .25s ease, box-shadow .25s ease;
+}
+body.theme-modern .tt-car-prev { left: -8px; }
+body.theme-modern .tt-car-next { right: -8px; }
+body.theme-modern .tt-car-arrow:hover {
+  background: linear-gradient(90deg, var(--m-neon), var(--m-neon2));
+  box-shadow: 0 0 16px rgba(139,92,246,.6);
+}
+
+/* ---------- Game categories (glassmorphism cards) ---------- */
+body.theme-modern .tt-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 700px) { body.theme-modern .tt-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+body.theme-modern .tt-cat-card {
+  background: var(--m-glass); border: 1px solid var(--m-glass-border); backdrop-filter: blur(10px);
+  border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 12px;
+  text-decoration: none; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+body.theme-modern .tt-cat-card:hover {
+  transform: translateY(-4px); border-color: rgba(139,92,246,.55);
+  box-shadow: 0 0 24px rgba(139,92,246,.35);
+}
+body.theme-modern .tt-cat-card img { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; }
+body.theme-modern .tt-cat-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: #fff; }
+
+/* ---------- Buttons ---------- */
+body.theme-modern .btn-primary {
+  background: linear-gradient(90deg, var(--m-neon), var(--m-neon2)) !important;
+  box-shadow: 0 0 18px rgba(139,92,246,.5) !important; border-radius: 14px !important;
+}
+body.theme-modern .btn-primary:hover { box-shadow: 0 0 28px rgba(139,92,246,.75) !important; }
+
+/* ---------- Reviews / Footer ---------- */
+body.theme-modern .reviews-section-wrap { background: var(--m-glass) !important; border: 1px solid var(--m-glass-border) !important; border-radius: 18px; backdrop-filter: blur(10px); }
+body.theme-modern .reviews-banner { background: linear-gradient(135deg, var(--m-bg3), var(--m-bg2)) !important; }
+body.theme-modern footer { background: transparent !important; border-top: 1px solid var(--m-glass-border) !important; }
+body.theme-modern .footer-col-title { color: #fff !important; }
+body.theme-modern .footer-col a, body.theme-modern .footer-desc { color: var(--m-text-muted) !important; }
+body.theme-modern .footer-col a:hover { color: var(--m-neon2) !important; text-shadow: 0 0 8px rgba(6,182,212,.6); }
+body.theme-modern .footer-bottom { color: var(--m-text-muted) !important; border-top: 1px solid var(--m-glass-border) !important; }
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  body.theme-modern::before, body.theme-modern::after, body.theme-modern .banner-diamond { animation: none !important; }
+}

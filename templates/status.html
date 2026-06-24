@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Order Status - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(250,204,21,0.3);border-top-color:#facc15;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes popIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.pop-in{animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards;}
+.status-wrap{max-width:540px;margin:0 auto;padding:90px 16px 60px;text-align:center;}
+.status-icon{font-size:4.5rem;margin-bottom:16px;}
+.status-badge{display:inline-block;padding:7px 24px;border-radius:20px;font-weight:700;font-size:0.9rem;margin-top:10px;font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;}
+.order-card{background:var(--card-bg);border:1px solid rgba(var(--purple-rgb),0.3);border-radius:18px;padding:22px;margin-top:24px;text-align:left;}
+.order-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;font-size:0.9rem;}
+.order-label{color:rgba(255,255,255,0.45);}
+.order-val{color:#fff;font-weight:600;text-align:right;}
+.progress-track{display:flex;flex-direction:column;gap:0;margin:20px 0;}
+.progress-step{display:flex;align-items:flex-start;gap:14px;position:relative;}
+.progress-step:not(:last-child)::after{content:'';position:absolute;left:15px;top:30px;width:2px;height:calc(100% - 10px);background:rgba(var(--purple-rgb),0.2);}
+.progress-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;z-index:1;font-weight:700;}
+.dot-done{background:rgba(34,197,94,0.2);border:2px solid #4ade80;color:#4ade80;}
+.dot-active{background:rgba(var(--purple-rgb),0.2);border:2px solid var(--purple-glow);color:var(--purple-glow);}
+.dot-wait{background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);}
+.progress-info{padding:4px 0 20px;}
+.progress-title{font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;}
+.progress-sub{font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:2px;}
+.proof-preview{max-width:100%;border-radius:10px;border:1px solid rgba(var(--purple-rgb),0.3);margin-top:10px;}
+</style>
+</head>
+<body>
+{% include '_pending_banner.html' %}
+<div id="main-site" class="visible">
+  <nav>
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+    <div class="nav-left">
+      <a href="{{ url_for('index') }}?skip=1" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">Home</a>
+      <a href="{{ url_for('game') }}">Games</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+    </div>
+    <div class="nav-center"></div>
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      <a href="{{ url_for('index') }}?skip=1" class="nav-login-btn">Home</a>
+    </div>
+  </nav>
+
+  <div class="status-wrap">
+
+    <!-- Status Display -->
+    {% if status == 'completed' %}
+      <div class="pop-in status-icon">&#9989;</div>
+      <div class="section-title" style="justify-content:center;">Top Up <span>Successful!</span></div>
+      <div class="section-sub" style="margin-top:8px;">Your items have been delivered to your game account.</div>
+      <div class="status-badge" style="background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3);">Completed</div>
+
+    {% elif status == 'cancelled' %}
+      <div class="pop-in status-icon">&#10060;</div>
+      <div class="section-title" style="justify-content:center;">Order <span>Cancelled</span></div>
+      <div class="section-sub" style="margin-top:8px;">This order has been cancelled. Please contact support if you believe this is an error.</div>
+      <div class="status-badge" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);">Cancelled</div>
+
+    {% elif status == 'processing' %}
+      <div class="status-icon">&#9881;</div>
+      <div class="section-title" style="justify-content:center;">Order <span>Processing</span></div>
+      <div class="section-sub" style="margin-top:8px;"><span class="spinner"></span>Your top up is being processed. Please wait...</div>
+      <div class="status-badge" style="background:rgba(var(--purple-rgb),0.15);color:var(--purple-glow);border:1px solid rgba(var(--purple-rgb),0.3);">Processing</div>
+
+    {% elif status == 'waiting_verification' %}
+      <div class="status-icon">&#128269;</div>
+      <div class="section-title" style="justify-content:center;">Waiting for <span>Verification</span></div>
+      <div class="section-sub" style="margin-top:8px;"><span class="spinner"></span>Admin is verifying your payment. Usually completed within 5-15 minutes.</div>
+      <div class="status-badge" style="background:rgba(var(--gold-rgb),0.15);color:var(--gold);border:1px solid rgba(var(--gold-rgb),0.3);">Waiting Verification</div>
+
+    {% else %}
+      <div class="status-icon">&#128179;</div>
+      <div class="section-title" style="justify-content:center;">Waiting for <span>Payment</span></div>
+      <div class="section-sub" style="margin-top:8px;">Please complete your payment to proceed.</div>
+      <div class="status-badge" style="background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.3);">Waiting Payment</div>
+
+      {% if is_owner %}
+      <div style="margin-top:20px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:18px 20px;text-align:center;">
+        <div style="color:#facc15;font-weight:700;font-size:0.95rem;margin-bottom:4px;">You haven't completed your payment yet</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:0.85rem;margin-bottom:14px;">Please finish your payment so we can process your order. Your items will not be delivered until payment is confirmed.</div>
+        <a href="{{ url_for('continue_order', order_id=order.id, token=order.token) }}" style="text-decoration:none;">
+          <button style="background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;border:none;padding:12px 28px;border-radius:12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">Continue Order</button>
+        </a>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- Progress Track -->
+    <div class="order-card">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:0.75rem;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:16px;">ORDER PROGRESS</div>
+      <div class="progress-track">
+
+        {% set steps = [
+          ('waiting_payment',     'Payment Pending',       'Waiting for customer payment'),
+          ('waiting_verification','Waiting Verification',  'Admin verifying payment proof'),
+          ('processing',          'Processing',            'Contacting game supplier'),
+          ('completed',           'Completed',             'Items delivered to game account'),
+        ] %}
+        {% set order_steps = ['waiting_payment','waiting_verification','processing','completed'] %}
+        {% set current_idx = order_steps.index(status) if status in order_steps else 0 %}
+
+        {% for step_key, step_title, step_sub in steps %}
+          {% set step_idx = loop.index0 %}
+          <div class="progress-step">
+            <div class="progress-dot {% if step_idx < current_idx %}dot-done{% elif step_idx == current_idx %}dot-active{% else %}dot-wait{% endif %}">
+              {% if step_idx < current_idx %}&#10003;{% else %}{{ loop.index }}{% endif %}
+            </div>
+            <div class="progress-info">
+              <div class="progress-title" style="color:{% if step_idx < current_idx %}#4ade80{% elif step_idx == current_idx %}#fff{% else %}rgba(255,255,255,0.3){% endif %};">{{ step_title }}</div>
+              <div class="progress-sub">{{ step_sub }}</div>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- Cancelled override -->
+        {% if status == 'cancelled' %}
+        <div class="progress-step">
+          <div class="progress-dot" style="background:rgba(239,68,68,0.2);border:2px solid #ef4444;color:#ef4444;">&#10007;</div>
+          <div class="progress-info">
+            <div class="progress-title" style="color:#ef4444;">Cancelled</div>
+            <div class="progress-sub">This order has been cancelled</div>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- Order Details -->
+    {% if order and is_owner %}
+    <div class="order-card">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:0.75rem;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:14px;">ORDER DETAILS</div>
+      <div class="order-row"><span class="order-label">Order ID</span><span class="order-val" style="color:var(--purple-glow);">#{{ order.id }}</span></div>
+      <div class="order-row"><span class="order-label">Game</span><span class="order-val">{{ order.game }}</span></div>
+      <div class="order-row"><span class="order-label">User ID</span><span class="order-val">{{ order.user_id }}{% if order.server_id %} / {{ order.server_id }}{% endif %}</span></div>
+      <div class="order-row"><span class="order-label">Package</span><span class="order-val" style="color:var(--diamond);">{{ order.diamond }}</span></div>
+      <div class="order-row"><span class="order-label">Payment Method</span><span class="order-val">{{ order.payment }}</span></div>
+      <div style="border-top:1px solid rgba(var(--purple-rgb),0.2);padding-top:12px;margin-top:4px;">
+        <div class="order-row"><span class="order-label">Total</span><span class="order-val" style="color:var(--gold);font-family:'Orbitron',monospace;font-size:1.05rem;">{{ order.price }}</span></div>
+      </div>
+      {% if order.payment_proof %}
+      <div style="margin-top:14px;border-top:1px solid rgba(var(--purple-rgb),0.15);padding-top:14px;">
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.35);margin-bottom:6px;">Payment Proof Uploaded</div>
+        <div style="color:#4ade80;font-size:0.85rem;">&#10003; Proof submitted, waiting for admin verification</div>
+      </div>
+      {% endif %}
+      {% if order.vip_trx_id %}
+      <div style="margin-top:14px;border-top:1px solid rgba(var(--purple-rgb),0.15);padding-top:14px;">
+        <div style="font-size:0.78rem;color:rgba(255,255,255,0.35);margin-bottom:6px;">Supplier Transaction ID</div>
+        <div style="color:#4ade80;font-family:monospace;font-size:0.85rem;">{{ order.vip_trx_id }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+      {% if status == 'cancelled' and is_owner %}
+        <a href="{{ url_for('game') }}" style="text-decoration:none;">
+          <button style="background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;border:none;padding:12px 24px;border-radius:12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">Try Again</button>
+        </a>
+      {% endif %}
+      <a href="{{ url_for('index') }}?skip=1" style="text-decoration:none;">
+        <button style="background:rgba(var(--purple-rgb),0.1);border:1px solid rgba(var(--purple-rgb),0.3);color:var(--purple-glow);padding:12px 24px;border-radius:12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">Back to Home</button>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+// Auto-refresh for pending statuses
+{% if status in ('waiting_payment','waiting_verification','processing') and order and is_owner %}
+const orderId = {{ order.id }};
+const token   = '{{ order.token }}';
+let checks = 0;
+const maxChecks = 60;
+
+async function checkStatus(){
+  if(checks >= maxChecks) return;
+  checks++;
+  try{
+    const res  = await fetch(`/api/order-status/${orderId}?token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if(data.status === 'completed' || data.status === 'cancelled'){
+      window.location.reload();
+    } else if(data.status !== '{{ status }}'){
+      window.location.reload();
+    }
+  } catch(e){}
+}
+setInterval(checkStatus, 8000);
+{% endif %}
+
+function toggleMenu(){
+  const m=document.getElementById('dotsMenu');
+  const o=document.getElementById('navOverlay');
+  if(!m) return;
+  const isOpen=m.classList.contains('open');
+  if(isOpen){m.classList.remove('open');if(o)o.classList.remove('open');}
+  else{m.classList.add('open');if(o)o.classList.add('open');}
+}
+function closeMenu(){
+  const m=document.getElementById('dotsMenu');
+  const o=document.getElementById('navOverlay');
+  if(m)m.classList.remove('open');
+  if(o)o.classList.remove('open');
+}
+document.addEventListener('click',(e)=>{
+  const menu=document.getElementById('dotsMenu');
+  const overlay=document.getElementById('navOverlay');
+  const btn=document.getElementById('hamburgerBtn');
+  if(!menu) return;
+  if(!(btn&&btn.contains(e.target))&&!menu.contains(e.target)&&menu.classList.contains('open')){
+    menu.classList.remove('open');
+    if(overlay)overlay.classList.remove('open');
+  }
+});
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

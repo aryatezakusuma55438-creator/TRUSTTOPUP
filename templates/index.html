@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<!-- New look switcher themes (instant, client-side, scoped under body.theme-simple / body.theme-modern) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+</head>
+<body>
+{% include '_pending_banner.html' %}
+
+<!-- =========== INTRO =========== -->
+<div id="intro">
+  <div id="stars-container"></div>
+
+  <div id="loading-diamond-wrap">
+    <svg id="loading-diamond-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ldGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e0f7ff"/>
+          <stop offset="40%" stop-color="var(--diamond)"/>
+          <stop offset="100%" stop-color="#0891b2"/>
+        </linearGradient>
+        <linearGradient id="ldGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#a5f3fc"/>
+          <stop offset="100%" stop-color="#0e7490"/>
+        </linearGradient>
+        <filter id="ldGlow">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g id="loading-diamond-whole" filter="url(#ldGlow)">
+        <polygon points="100,20 160,75 100,180 40,75" fill="url(#ldGrad1)" opacity="0.95"/>
+        <polygon points="100,20 160,75 100,75 40,75" fill="#a5f3fc" opacity="0.7"/>
+        <polygon points="40,75 100,75 100,180" fill="url(#ldGrad2)" opacity="0.85"/>
+        <polygon points="160,75 100,75 100,180" fill="var(--diamond)" opacity="0.6"/>
+      </g>
+      <g id="loading-diamond-shards">
+        <polygon class="shard" points="100,20 160,75 100,75 40,75" fill="url(#ldGrad1)" opacity="0.9"/>
+        <polygon class="shard" points="40,75 100,75 100,180" fill="url(#ldGrad2)" opacity="0.85"/>
+        <polygon class="shard" points="160,75 100,75 100,180" fill="var(--diamond)" opacity="0.7"/>
+        <polygon class="shard" points="100,20 40,75 100,75" fill="#e0f7ff" opacity="0.6"/>
+      </g>
+    </svg>
+  </div>
+
+  <div id="loading-text">Loading TrustTop Up<span id="loading-dots">...</span></div>
+
+
+</div>
+
+<style>
+  #loading-diamond-wrap { position:relative; width:36px; height:36px; margin:0 auto; }
+  #loading-diamond-svg { width:100%; height:100%; }
+
+  @keyframes diamondFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes wholeVisibility {
+    0%, 55%  { opacity:1; }
+    65%, 90% { opacity:0; }
+    100%     { opacity:1; }
+  }
+  @keyframes shardVisibility {
+    0%, 55%  { opacity:0; }
+    65%      { opacity:1; }
+    90%, 100%{ opacity:0; }
+  }
+  @keyframes shardFly {
+    0%, 55%  { transform:translate(0,0) scale(1) rotate(0deg); }
+    90%      { transform:translate(var(--sx,0), var(--sy,40px)) scale(0.55) rotate(var(--sr,40deg)); }
+    100%     { transform:translate(0,0) scale(1) rotate(0deg); }
+  }
+
+  #loading-diamond-whole {
+    animation: diamondFloat 1.8s ease-in-out infinite, wholeVisibility 1.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+  #loading-diamond-shards .shard {
+    animation: shardFly 1.8s ease-in-out infinite, shardVisibility 1.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+  #loading-diamond-shards .shard:nth-child(1) { --sx:-34px; --sy:-42px; --sr:-50deg; }
+  #loading-diamond-shards .shard:nth-child(2) { --sx:-36px; --sy:34px;  --sr:60deg; }
+  #loading-diamond-shards .shard:nth-child(3) { --sx:34px;  --sy:36px;  --sr:-45deg; }
+  #loading-diamond-shards .shard:nth-child(4) { --sx:30px;  --sy:-38px; --sr:55deg; }
+
+  #loading-text {
+    margin-top:24px; text-align:center; font-family:'Nunito',sans-serif; font-size:0.95rem;
+    color:rgba(255,255,255,0.55); letter-spacing:0.5px;
+  }
+</style>
+
+
+<!-- =========== MAIN WEBSITE =========== -->
+<div id="main-site">
+
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger + Logo -->
+    <div class="nav-left">
+      <a href="{{ url_for('index') }}" class="nav-logo-wrap" aria-label="TrustTop Up">
+        <span class="nav-logo-mark"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></span>
+        <span class="nav-logo-sub">TrustTop Up</span>
+      </a>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">{{ t('nav_home') }}</a>
+      <a href="{{ url_for('game') }}">{{ t('nav_games') }}</a>
+      <a href="{{ url_for('reting') }}">{{ t('nav_rating') }}</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">{{ t('nav_status') }}</a>
+      <a href="{{ url_for('kritik') }}">{{ t('nav_critique') }}</a>
+      <a href="{{ url_for('saran') }}">{{ t('nav_suggestion') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">{{ t('nav_logout') }}</a>
+    </div>
+
+    <!-- Center: Search -->
+    <div class="nav-center">
+      <div class="nav-search">
+        <svg class="nav-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="game-search-input" placeholder="Search games..." autocomplete="off" oninput="filterGames(this.value)">
+      </div>
+      <div class="nav-search-results" id="game-search-results"></div>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-search-toggle-btn" onclick="toggleMobileSearch('mobile-search-bar-1')" aria-label="Search">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+    </div>
+  </nav>
+
+  <!-- Mobile search bar (logged-in) -->
+  <div class="nav-search-mobile-bar" id="mobile-search-bar-1">
+    <div class="nav-search">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search games..." autocomplete="off" oninput="filterGames(this.value, 'game-search-results-mobile-1')">
+    </div>
+    <div class="nav-search-results" id="game-search-results-mobile-1"></div>
+  </div>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger + Logo -->
+    <div class="nav-left">
+      <a href="{{ url_for('index') }}" class="nav-logo-wrap" aria-label="TrustTop Up">
+        <span class="nav-logo-mark"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></span>
+        <span class="nav-logo-sub">TrustTop Up</span>
+      </a>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Search -->
+    <div class="nav-center">
+      <div class="nav-search">
+        <svg class="nav-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="game-search-input-guest" placeholder="Search games..." autocomplete="off" oninput="filterGames(this.value, 'game-search-results-guest')">
+      </div>
+      <div class="nav-search-results" id="game-search-results-guest"></div>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-search-toggle-btn" onclick="toggleMobileSearch('mobile-search-bar-2')" aria-label="Search">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      <div class="nav-action-group">
+        <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile search bar (guest) -->
+  <div class="nav-search-mobile-bar" id="mobile-search-bar-2">
+    <div class="nav-search">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search games..." autocomplete="off" oninput="filterGames(this.value, 'game-search-results-mobile-2')">
+    </div>
+    <div class="nav-search-results" id="game-search-results-mobile-2"></div>
+  </div>
+{% endif %}
+
+  <!-- BANNER SLIDESHOW -->
+  <section class="banner-section">
+    <div class="banner-slider" id="bannerSlider">
+      <!-- Banner 0: Welcome -->
+      <div class="banner-slide active" style="background:linear-gradient(135deg,#3b0764 0%,#581c87 50%,#1e1b4b 100%);">
+        <div class="banner-content">
+          <div class="banner-tag">{{ t('banner0_tag') }}</div>
+          <div class="banner-title">{{ t('banner0_title') }}</div>
+          <div class="banner-sub">{{ t('banner0_sub') }}</div>
+          <a href="{{ url_for('game') }}" class="banner-btn">{{ t('banner0_btn') }}</a>
+        </div>
+        <div class="banner-deco">
+          <div class="banner-circle" style="background:rgba(var(--purple-glow-rgb),0.2);border-color:rgba(var(--purple-glow-rgb),0.4);"></div>
+          <div class="banner-diamond" style="color:#e879f9;">&#9670;</div>
+        </div>
+      </div>
+      <!-- Banner 1: Mobile Legends -->
+      <div class="banner-slide" style="background:linear-gradient(135deg,#6d28d9 0%,#4c1d95 50%,#1e1b4b 100%);">
+        <div class="banner-content">
+          <div class="banner-tag">{{ t('banner1_tag') }}</div>
+          <div class="banner-title">{{ t('banner1_title') }}</div>
+          <div class="banner-sub">{{ t('banner1_sub') }}</div>
+          <a href="{{ url_for('game') }}" class="banner-btn">{{ t('banner1_btn') }}</a>
+        </div>
+        <div class="banner-deco">
+          <div class="banner-circle"></div>
+          <div class="banner-diamond">&#9670;</div>
+        </div>
+      </div>
+      <!-- Banner 2: Free Fire -->
+      <div class="banner-slide" style="background:linear-gradient(135deg,#0f4c75 0%,#1b262c 50%,#0a1628 100%);">
+        <div class="banner-content">
+          <div class="banner-tag">{{ t('banner2_tag') }}</div>
+          <div class="banner-title">{{ t('banner2_title') }}</div>
+          <div class="banner-sub">{{ t('banner2_sub') }}</div>
+          <a href="{{ url_for('game') }}" class="banner-btn">{{ t('banner2_btn') }}</a>
+        </div>
+        <div class="banner-deco">
+          <div class="banner-circle" style="background:rgba(var(--cyan-rgb),0.15);border-color:rgba(var(--cyan-rgb),0.3);"></div>
+          <div class="banner-diamond" style="color:var(--cyan);">&#9670;</div>
+        </div>
+      </div>
+      <!-- Banner 3: Genshin -->
+      <div class="banner-slide" style="background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#0a2818 100%);">
+        <div class="banner-content">
+          <div class="banner-tag">{{ t('banner3_tag') }}</div>
+          <div class="banner-title">{{ t('banner3_title') }}</div>
+          <div class="banner-sub">{{ t('banner3_sub') }}</div>
+          <a href="{{ url_for('game') }}" class="banner-btn">{{ t('banner3_btn') }}</a>
+        </div>
+        <div class="banner-deco">
+          <div class="banner-circle" style="background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.3);"></div>
+          <div class="banner-diamond" style="color:#34d399;">&#9670;</div>
+        </div>
+      </div>
+      <!-- Dots indicator -->
+      <div class="banner-dots">
+        <span class="banner-dot active" onclick="goSlide(0)"></span>
+        <span class="banner-dot" onclick="goSlide(1)"></span>
+        <span class="banner-dot" onclick="goSlide(2)"></span>
+        <span class="banner-dot" onclick="goSlide(3)"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- REKOMENDASI -->
+  {% set featured = (games | selectattr('badge','equalto','HOT') | list | first)
+                     or (games | selectattr('badge','equalto','POPULAR') | list | first)
+                     or games[0] %}
+  <section class="section" style="padding-bottom:0;">
+    <div class="section-title"><span class="emoji-icon">&#10024;</span> {{ t('index_recommended') }}</div>
+    <div class="section-sub">{{ t('index_recommended_sub') }}</div>
+    <a href="{{ url_for('topup_page', slug=featured.slug) }}" class="featured-card">
+      <img src="{{ url_for('static', filename='game/' + featured.image) }}" alt="{{ featured.name }}" class="featured-card-img" onerror="this.style.display:'none'">
+      <div class="featured-card-info">
+        {% if featured.badge %}<div class="featured-card-tag">{{ featured.badge }}</div>{% endif %}
+        <div class="featured-card-name">{{ featured.name }}</div>
+      </div>
+      <div class="featured-card-cta">{{ t('index_topup_now') }}</div>
+    </a>
+  </section>
+
+  <!-- POPULAR NOW -->
+  <section class="section" style="padding-bottom:0;">
+    <div class="section-title"><span class="emoji-icon">&#128293;</span> {{ t('index_popular') }}</div>
+    <div class="section-sub">{{ t('index_popular_sub') }}</div>
+    <div class="popular-list">
+      {% for game in games %}
+      <a href="{{ url_for('topup_page', slug=game.slug) }}" class="popular-item">
+        <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" class="popular-item-img" onerror="this.style.display='none'">
+        <div class="popular-item-info">
+          <div class="popular-item-name">{{ game.name }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ============ NEW: POPULAR THIS WEEK (carousel) ============ -->
+  <section class="section tt-section-carousel">
+    <div class="section-title"><span class="emoji-icon">&#127942;</span> Popular This Week</div>
+    <div class="section-sub">Trending top-ups, fresh every week</div>
+    <div class="tt-carousel" data-autoplay="3500">
+      <button class="tt-car-arrow tt-car-prev" aria-label="Previous">&#8249;</button>
+      <div class="tt-carousel-track">
+        {% for game in games %}
+        <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-car-card">
+          {% if game.badge %}<span class="tt-car-badge">{{ game.badge }}</span>{% endif %}
+          <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" loading="lazy">
+          <div class="tt-car-info">
+            <div class="tt-car-name">{{ game.name }}</div>
+            <div class="tt-car-meta">
+              <span class="tt-car-price">{{ game.price }}</span>
+              <span class="tt-car-rating">&#9733; 4.{{ 6 + (loop.index0 % 4) }}</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      <button class="tt-car-arrow tt-car-next" aria-label="Next">&#8250;</button>
+    </div>
+  </section>
+
+  <!-- ============ NEW: TOP SELLERS (carousel) ============ -->
+  <section class="section tt-section-carousel">
+    <div class="section-title"><span class="emoji-icon">&#128181;</span> Top Sellers</div>
+    <div class="section-sub">Most top-up favorites of all time</div>
+    <div class="tt-carousel" data-autoplay="4200">
+      <button class="tt-car-arrow tt-car-prev" aria-label="Previous">&#8249;</button>
+      <div class="tt-carousel-track">
+        {% for game in games|reverse %}
+        <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-car-card tt-car-card-seller">
+          <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" loading="lazy">
+          <div class="tt-car-info">
+            <div class="tt-car-name">{{ game.name }}</div>
+            <div class="tt-car-meta">
+              <span class="tt-car-price">{{ game.price }}</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      <button class="tt-car-arrow tt-car-next" aria-label="Next">&#8250;</button>
+    </div>
+  </section>
+
+  <!-- ============ NEW: GAME CATEGORIES (glass cards) ============ -->
+  <section class="section tt-section-categories">
+    <div class="section-title"><span class="emoji-icon">&#127918;</span> Game Categories</div>
+    <div class="section-sub">Jump straight to your favorite game</div>
+    <div class="tt-cat-grid">
+      {% for game in games %}
+      <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-cat-card">
+        <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" loading="lazy">
+        <span class="tt-cat-name">{{ game.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="section" style="padding-top:0;">
+    <div class="category-tabs-wrap">
+      <button class="cat-arrow cat-prev" onclick="scrollCatTabs(-1)" aria-label="Previous">&#8249;</button>
+      <div class="category-tabs" id="categoryTabs">
+        <button class="cat-tab active">{{ t('index_cat_topup') }}</button>
+        <button class="cat-tab">{{ t('index_cat_joki_mlbb') }}</button>
+        <button class="cat-tab">{{ t('index_cat_joki_hok') }}</button>
+      </div>
+      <button class="cat-arrow cat-next" onclick="scrollCatTabs(1)" aria-label="Next">&#8250;</button>
+    </div>
+    <div class="games-grid">
+      {% for game in games %}
+      <a href="{{ url_for('topup_page', slug=game.slug) }}" class="game-card" style="text-decoration:none;">
+        {% if game.badge %}<div class="popular-badge">{{ game.badge }}</div>{% endif %}
+        <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" class="game-img" onerror="this.style.display='none'">
+        <div class="game-overlay-name">{{ game.name }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- CUSTOMER REVIEWS -->
+  <section class="section reviews-section-wrap">
+    <div class="reviews-banner">
+      <div class="reviews-banner-hex reviews-banner-hex-left"></div>
+      <div class="reviews-banner-hex reviews-banner-hex-right"></div>
+      <div class="reviews-banner-center">
+        <span class="reviews-banner-logo-mark">
+          <span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span>
+        </span>
+        <span class="reviews-banner-name">TrustTop Up</span>
+      </div>
+    </div>
+    <div class="reviews-content">
+      <div class="section-title"><span>{{ t('index_reviews_title').split()[0] }}</span> {{ t('index_reviews_title').split()[1:] | join(' ') }}</div>
+      <div class="section-sub">{{ t('index_reviews_sub') }}</div>
+      <div style="text-align:center;margin-top:20px;">
+        <a href="{{ url_for('reting') }}" class="btn-primary" style="text-decoration:none;display:inline-block;">{{ t('index_view_ratings') }}</a>
+      </div>
+    </div>
+  </section>
+
+<footer>
+  <div class="footer-inner">
+
+    <!-- Brand -->
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="footer-logo-mark">
+          <span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span>
+        </div>
+        <span class="footer-logo-name">TrustTop Up</span>
+      </div>
+      <div class="footer-desc">{{ t('footer_desc') }}</div>
+    </div>
+
+    <!-- Site Map -->
+    <div class="footer-col">
+      <div class="footer-col-title">{{ t('footer_sitemap') }}</div>
+      <a href="{{ url_for('index') }}">{{ t('footer_home') }}</a>
+      <a href="{{ url_for('game') }}">{{ t('footer_games') }}</a>
+      <a href="{{ url_for('reting') }}">{{ t('footer_reviews') }}</a>
+      <a href="{{ url_for('contact') }}">{{ t('footer_contact') }}</a>
+      <a href="{{ url_for('status') }}">{{ t('footer_check_tx') }}</a>
+    </div>
+
+    <!-- Legal -->
+    <div class="footer-col">
+      <div class="footer-col-title">{{ t('footer_legal') }}</div>
+      <a href="{{ url_for('tentang') }}">{{ t('footer_about') }}</a>
+      <a href="{{ url_for('privacy') }}">{{ t('footer_privacy') }}</a>
+      <a href="{{ url_for('refund') }}">{{ t('footer_refund') }}</a>
+      <a href="{{ url_for('syarat') }}">{{ t('footer_terms') }}</a>
+      <a href="{{ url_for('faq') }}">{{ t('footer_faq') }}</a>
+    </div>
+
+  </div>
+  <div class="footer-bottom">© 2026 {{ t('footer_copyright') }}</div>
+</footer>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()"></button>
+    <div class="donate-icon">
+      <svg width="64" height="64" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;margin:0 auto;">
+        <rect x="1" y="2" width="2" height="2" fill="var(--gold)"/>
+        <rect x="3" y="1" width="3" height="2" fill="var(--gold)"/>
+        <rect x="10" y="1" width="3" height="2" fill="var(--gold)"/>
+        <rect x="6" y="1" width="4" height="1" fill="var(--gold)"/>
+        <rect x="13" y="2" width="2" height="2" fill="var(--gold)"/>
+        <rect x="1" y="4" width="14" height="3" fill="var(--gold)"/>
+        <rect x="2" y="7" width="12" height="2" fill="var(--gold)"/>
+        <rect x="3" y="9" width="10" height="2" fill="var(--gold)"/>
+        <rect x="4" y="11" width="8" height="2" fill="var(--gold)"/>
+        <rect x="5" y="13" width="6" height="1" fill="var(--gold)"/>
+        <rect x="6" y="14" width="4" height="1" fill="var(--gold)"/>
+        <rect x="7" y="15" width="2" height="1" fill="var(--gold)"/>
+        <!-- highlight -->
+        <rect x="3" y="2" width="2" height="1" fill="#fde68a"/>
+        <rect x="2" y="3" width="3" height="1" fill="#fde68a"/>
+        <rect x="2" y="4" width="2" height="1" fill="#fde68a"/>
+      </svg>
+    </div>
+    <div class="modal-title">Donate</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">
+      Your donation means a lot to us as we continue to develop this website. Thank you!
+    </div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <div style="color:rgba(255,255,255,0.45);font-size:0.8rem;">After transferring, please confirm via WhatsApp!</div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"> Top Up berhasil diproses!</div>
+
+<script>
+  window.ALL_GAMES = {{ games | tojson }};
+</script>
+<script>
+// Mobile tap-to-reveal game name (like OuraStore)
+document.addEventListener('DOMContentLoaded', function() {
+  var cards = document.querySelectorAll('.game-card');
+  cards.forEach(function(card) {
+    card.addEventListener('touchstart', function(e) {
+      var alreadyTapped = card.classList.contains('tapped');
+      // Remove tapped from all others
+      cards.forEach(function(c){ c.classList.remove('tapped'); });
+      if (!alreadyTapped) {
+        card.classList.add('tapped');
+        e.preventDefault(); // prevent immediate navigation on first tap
+      }
+      // Second tap (card already had tapped) → navigate
+    }, { passive: false });
+  });
+  // Tap anywhere else → hide all
+  document.addEventListener('touchstart', function(e) {
+    if (!e.target.closest('.game-card')) {
+      cards.forEach(function(c){ c.classList.remove('tapped'); });
+    }
+  });
+});
+</script>
+<script>
+function scrollCatTabs(dir) {
+  var el = document.getElementById('categoryTabs');
+  el.scrollBy({ left: dir * 120, behavior: 'smooth' });
+}
+document.querySelectorAll('.cat-tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.cat-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="{{ url_for('static', filename='notif.js') }}"></script>
+<script src="{{ url_for('static', filename='carousel.js') }}"></script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

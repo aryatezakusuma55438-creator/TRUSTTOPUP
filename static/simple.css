@@ -1,0 +1,195 @@
+/* ==========================================================================
+   simple.css — Clean / Minimalist / Professional Game Marketplace Theme
+   Scoped entirely under body.theme-simple so it never affects the default
+   look unless explicitly activated by theme-switcher.js
+   ========================================================================== */
+
+body.theme-simple {
+  --s-primary: #3B82F6;
+  --s-secondary: #F5F7FA;
+  --s-accent: #FF6B4A;
+  --s-text: #1F2937;
+  --s-text-muted: #6B7280;
+  --s-border: #E5E7EB;
+  --s-card-bg: #FFFFFF;
+
+  background: var(--s-secondary) !important;
+  color: var(--s-text) !important;
+  font-family: 'Nunito', system-ui, sans-serif !important;
+}
+
+body.theme-simple #intro,
+body.theme-simple .star,
+body.theme-simple #stars-container { display: none !important; }
+
+body.theme-simple #main-site { background: var(--s-secondary); }
+
+/* ---------- Navbar ---------- */
+body.theme-simple nav {
+  background: #fff !important;
+  border-bottom: 1px solid var(--s-border) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  backdrop-filter: none !important;
+}
+/* Logo keeps its original purple-cyan gradient brand colors (no override) */
+body.theme-simple .nav-logo-sub { color: var(--s-text) !important; font-weight: 700; }
+body.theme-simple .nav-search {
+  background: var(--s-secondary) !important;
+  border: 1px solid var(--s-border) !important;
+  border-radius: 24px !important;
+}
+body.theme-simple .nav-search input { color: var(--s-text) !important; }
+body.theme-simple .nav-search input::placeholder { color: #9CA3AF !important; }
+body.theme-simple .nav-search-icon { color: #9CA3AF !important; }
+body.theme-simple .nav-lang-pill,
+body.theme-simple .nav-hamburger,
+body.theme-simple .nav-search-toggle-btn {
+  color: var(--s-text) !important;
+  border-color: var(--s-border) !important;
+}
+body.theme-simple .nav-hamburger:hover { background: var(--s-secondary) !important; }
+body.theme-simple .dots-menu {
+  background: #fff !important;
+  border-right: 1px solid var(--s-border);
+}
+body.theme-simple .dots-menu a { color: var(--s-text) !important; }
+body.theme-simple .dots-menu a:hover { background: var(--s-secondary) !important; color: var(--s-primary) !important; }
+body.theme-simple .dots-menu-header {
+  background: var(--s-primary) !important; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  border-bottom: 1px solid var(--s-border) !important;
+}
+
+/* theme pill switcher (visible in all themes, restyled per-theme) */
+body.theme-simple .tt-theme-switcher { background: var(--s-secondary); border: 1px solid var(--s-border); }
+body.theme-simple .tt-theme-pill { color: var(--s-text-muted); }
+body.theme-simple .tt-theme-pill.active { background: var(--s-primary); color: #fff; }
+
+/* ---------- Hero / Banner ---------- */
+body.theme-simple .banner-section { background: transparent !important; padding: 20px 16px 0 !important; }
+body.theme-simple .banner-slider { border-radius: 16px !important; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,.08); }
+body.theme-simple .banner-slide { background: linear-gradient(135deg, var(--s-primary), #60A5FA) !important; }
+body.theme-simple .banner-tag { background: rgba(255,255,255,.25) !important; }
+body.theme-simple .banner-btn {
+  background: #fff !important; color: var(--s-primary) !important; font-weight: 800 !important;
+}
+body.theme-simple .banner-dot.active { background: #fff !important; }
+
+/* ---------- Section headers ---------- */
+body.theme-simple .section-title { color: var(--s-text) !important; font-family: 'Nunito', sans-serif !important; font-weight: 800 !important; }
+body.theme-simple .section-sub { color: var(--s-text-muted) !important; }
+
+/* ---------- Featured / Popular list (existing features, restyled) ---------- */
+body.theme-simple .featured-card {
+  background: var(--s-card-bg) !important; border: 1px solid var(--s-border) !important;
+  border-radius: 16px !important; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+body.theme-simple .featured-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.1); border-color: var(--s-primary) !important; }
+body.theme-simple .featured-card-name { color: var(--s-text) !important; }
+body.theme-simple .featured-card-cta { background: var(--s-accent) !important; }
+body.theme-simple .popular-item {
+  background: var(--s-card-bg) !important; border: 1px solid var(--s-border) !important; border-radius: 12px !important;
+}
+body.theme-simple .popular-item-name { color: var(--s-text) !important; }
+
+/* ---------- Game cards / product grid (4-5 per row, rounded, soft shadow) ---------- */
+body.theme-simple .games-grid { display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 16px !important; }
+@media (max-width: 1100px) { body.theme-simple .games-grid { grid-template-columns: repeat(4, 1fr) !important; } }
+@media (max-width: 800px)  { body.theme-simple .games-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+@media (max-width: 560px)  { body.theme-simple .games-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+
+body.theme-simple .game-card {
+  background: var(--s-card-bg) !important;
+  border: 1px solid var(--s-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05) !important;
+  transition: transform .25s ease, box-shadow .25s ease !important;
+  overflow: hidden !important;
+}
+body.theme-simple .game-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.12) !important;
+}
+body.theme-simple .game-overlay-name {
+  background: linear-gradient(to top, rgba(0,0,0,.75), transparent) !important;
+  color: #fff !important; font-weight: 700 !important;
+}
+body.theme-simple .popular-badge { background: var(--s-accent) !important; }
+body.theme-simple .category-tabs-wrap .cat-tab {
+  background: var(--s-card-bg) !important; border: 1px solid var(--s-border) !important; color: var(--s-text-muted) !important;
+}
+body.theme-simple .cat-tab.active { background: var(--s-primary) !important; color: #fff !important; border-color: var(--s-primary) !important; }
+body.theme-simple .cat-arrow { background: var(--s-card-bg) !important; border: 1px solid var(--s-border) !important; color: var(--s-text) !important; }
+
+/* ---------- New: Popular This Week / Top Sellers carousels (simple variant) ---------- */
+body.theme-simple .tt-carousel { position: relative; }
+body.theme-simple .tt-carousel-track {
+  display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+  -ms-overflow-style: none; scrollbar-width: none; padding: 4px 2px 12px;
+  cursor: grab;
+}
+body.theme-simple .tt-carousel-track::-webkit-scrollbar { display: none; }
+body.theme-simple .tt-carousel-track:active { cursor: grabbing; }
+body.theme-simple .tt-car-card {
+  flex: 0 0 180px; scroll-snap-align: start; background: var(--s-card-bg);
+  border: 1px solid var(--s-border); border-radius: 16px; overflow: hidden;
+  text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  transition: transform .25s ease, box-shadow .25s ease;
+  position: relative; display: block;
+}
+body.theme-simple .tt-car-card:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 10px 22px rgba(0,0,0,.12); }
+body.theme-simple .tt-car-card img { width: 100%; height: 130px; object-fit: cover; display: block; }
+body.theme-simple .tt-car-info { padding: 10px 12px; }
+body.theme-simple .tt-car-name { font-weight: 700; font-size: .9rem; color: var(--s-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.theme-simple .tt-car-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: .8rem; }
+body.theme-simple .tt-car-price { color: var(--s-primary); font-weight: 700; }
+body.theme-simple .tt-car-rating { color: #F59E0B; }
+body.theme-simple .tt-car-badge {
+  position: absolute; top: 8px; left: 8px; background: var(--s-accent); color: #fff;
+  font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; z-index: 2;
+}
+body.theme-simple .tt-car-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--s-border);
+  background: #fff; color: var(--s-text); font-size: 1.2rem; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1); display: flex; align-items: center; justify-content: center;
+}
+body.theme-simple .tt-car-prev { left: -6px; }
+body.theme-simple .tt-car-next { right: -6px; }
+body.theme-simple .tt-car-arrow:hover { background: var(--s-primary); color: #fff; }
+
+/* ---------- New: Category grid (simple = clean cards, not glass) ---------- */
+body.theme-simple .tt-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 700px) { body.theme-simple .tt-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+body.theme-simple .tt-cat-card {
+  background: var(--s-card-bg); border: 1px solid var(--s-border); border-radius: 14px;
+  padding: 14px; display: flex; align-items: center; gap: 10px; text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+body.theme-simple .tt-cat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.08); border-color: var(--s-primary); }
+body.theme-simple .tt-cat-card img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+body.theme-simple .tt-cat-name { font-weight: 700; font-size: .88rem; color: var(--s-text); }
+
+/* ---------- Buttons ---------- */
+body.theme-simple .btn-primary { background: var(--s-primary) !important; box-shadow: none !important; border-radius: 24px !important; }
+body.theme-simple .btn-primary:hover { background: #2563EB !important; transform: translateY(-2px) !important; box-shadow: 0 6px 16px rgba(59,130,246,.35) !important; }
+
+/* ---------- Reviews / Footer ---------- */
+body.theme-simple .reviews-section-wrap { background: var(--s-card-bg) !important; border-radius: 16px; border: 1px solid var(--s-border); }
+body.theme-simple .reviews-banner { background: linear-gradient(135deg, var(--s-primary), #60A5FA) !important; }
+/* The torn-edge mask under the banner used the dark default --bg var, leaving a dark sliver on the light theme */
+body.theme-simple .reviews-banner::after { background: var(--s-secondary) !important; }
+/* Brand gradient text was tuned for a dark background; force solid white + drop the purple glow so it stays readable on the blue banner */
+body.theme-simple .reviews-banner-logo-mark .logo-t,
+body.theme-simple .reviews-banner-name {
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+  filter: none !important;
+}
+body.theme-simple footer { background: #fff !important; border-top: 1px solid var(--s-border) !important; }
+body.theme-simple .footer-logo-mark .logo-t,
+body.theme-simple .footer-logo-name { color: var(--s-text) !important; }
+body.theme-simple .footer-col-title { color: var(--s-text) !important; }
+body.theme-simple .footer-col a, body.theme-simple .footer-desc { color: var(--s-text-muted) !important; }
+body.theme-simple .footer-col a:hover { color: var(--s-primary) !important; }
+body.theme-simple .footer-bottom { color: var(--s-text-muted) !important; border-top: 1px solid var(--s-border) !important; }

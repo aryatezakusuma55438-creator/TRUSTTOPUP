@@ -1,0 +1,324 @@
+/* ===== TOP UP PAGE — OuraStore-inspired ===== */
+
+.topup-page {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 56px 0 140px;
+  box-sizing: border-box;
+}
+@media (min-width: 900px) {
+  .topup-page { max-width: 720px; padding-top: 72px; }
+}
+
+/* ── GAME BANNER ── */
+.topup-header {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  overflow: hidden;
+}
+.topup-header-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,#1a0533 0%,#2d1060 40%,#0a1628 100%);
+}
+.topup-header-blur-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: blur(18px) brightness(.45) saturate(1.4);
+  transform: scale(1.1);
+}
+.topup-header-content {
+  position: relative; z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 0 16px 18px;
+  height: 100%;
+}
+.topup-header-img {
+  width: 72px; height: 72px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,.2);
+  flex-shrink: 0;
+}
+.topup-header-text { flex: 1; min-width: 0; }
+.topup-header-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: #fff; line-height: 1.1;
+  text-transform: uppercase;
+}
+.topup-header-pub {
+  font-size: .78rem;
+  color: rgba(255,255,255,.45);
+  margin-top: 2px;
+}
+
+/* ── TRUST BAR ── */
+.trust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 16px;
+  background: rgba(255,255,255,.03);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 8px;
+}
+.trust-bar-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .72rem; font-weight: 700;
+  color: rgba(255,255,255,.55);
+  font-family: 'Nunito', sans-serif;
+  white-space: nowrap;
+}
+.trust-bar-icon { width: 13px; height: 13px; flex-shrink: 0; }
+.trust-bar-item:nth-child(1) .trust-bar-icon { color: #f59e0b; }
+.trust-bar-item:nth-child(2) .trust-bar-icon { color: #06b6d4; }
+.trust-bar-item:nth-child(3) .trust-bar-icon { color: #4ade80; }
+.trust-icon-bounce { animation: trustBounce 1.4s ease-in-out infinite; }
+.trust-icon-wiggle { animation: trustWiggle 1.8s ease-in-out infinite; }
+.trust-icon-pulse  { animation: trustPulse  1.6s ease-in-out infinite; }
+@keyframes trustBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+@keyframes trustWiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-12deg)} 75%{transform:rotate(12deg)} }
+@keyframes trustPulse  { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.18);opacity:.85} }
+
+/* ── STEP CARDS — OuraStore warm dark style ── */
+.topup-step {
+  background: #1e1e1e;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 0;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+/* OuraStore: gold/tan number + darker header row */
+.topup-step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: #2c2c2c;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.step-number {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #b8864e, #d4a055);
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; font-size: .95rem;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(180,130,60,.4);
+}
+.step-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  color: #fff; letter-spacing: .3px;
+}
+
+.topup-step-body { padding: 16px; }
+.topup-step-body label {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: .82rem;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 5px; margin-top: 12px;
+}
+.topup-step-body label:first-child { margin-top: 0; }
+.optional-tag { font-size: .75rem; color: rgba(255,255,255,.3); }
+
+/* Inputs — OuraStore grey, no purple tint */
+.topup-step-body input[type="text"],
+.topup-step-body input[type="email"],
+.topup-step-body select {
+  width: 100%;
+  background: #2a2a2a;
+  border: 1px solid rgba(255,255,255,.12);
+  color: #e0e0e0;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: .93rem;
+  font-family: 'Nunito', sans-serif;
+  box-sizing: border-box;
+  transition: border-color .2s;
+}
+.topup-step-body input::placeholder,
+.topup-step-body select { color: rgba(255,255,255,.3); }
+.topup-step-body input:focus,
+.topup-step-body select:focus {
+  outline: none;
+  border-color: rgba(255,255,255,.35);
+  background: #333;
+}
+.topup-step-body input.input-error { border-color: #ef4444; }
+
+/* ── AMOUNT GRID — OuraStore card style ── */
+.amount-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.amount-option {
+  position: relative;
+  background: #252525;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: 12px 12px 28px;  /* extra bottom for badge */
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  overflow: hidden;
+}
+.amount-option:hover {
+  border-color: rgba(255,255,255,.25);
+  background: #2e2e2e;
+}
+.amount-option.selected {
+  border-color: #b8864e;
+  background: rgba(184,134,78,.1);
+  box-shadow: 0 0 0 1px #b8864e;
+}
+.amount-option-label {
+  color: #e0e0e0;
+  font-size: .88rem;
+  font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  margin-bottom: 4px;
+}
+.amount-option-price {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: .88rem;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* "Pengiriman INSTAN" badge — bottom right like OuraStore */
+.amount-option::after {
+  content: 'Pengiriman INSTAN';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,.06);
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 4px 8px;
+  font-size: .6rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.4);
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: .3px;
+  text-align: right;
+}
+.amount-option.selected::after {
+  color: rgba(184,134,78,.8);
+  background: rgba(184,134,78,.06);
+  border-top-color: rgba(184,134,78,.2);
+}
+
+/* ── PAYMENT OPTIONS — full-width rows like OuraStore ── */
+.payment-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.payment-option {
+  background: #252525;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  color: rgba(255,255,255,.7);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; font-size: .95rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex; align-items: center; gap: 10px;
+}
+.payment-option::before {
+  content: '';
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.2);
+  flex-shrink: 0;
+  transition: border-color .15s, background .15s;
+}
+.payment-option.selected {
+  border-color: #b8864e;
+  background: rgba(184,134,78,.08);
+  color: #fff;
+}
+.payment-option.selected::before {
+  background: #b8864e;
+  border-color: #b8864e;
+}
+
+/* ── VOUCHER ── */
+#voucher-code {
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── SUMMARY BAR — OuraStore "Pesan Sekarang!" style ── */
+.summary-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 500;
+  background: #1a1a1a;
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding: 8px 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 -6px 28px rgba(0,0,0,.6);
+}
+.summary-bar-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.summary-bar-row {
+  display: flex; gap: 5px;
+  font-size: .68rem;
+  white-space: nowrap; overflow: hidden;
+}
+.summary-bar-key { color: rgba(255,255,255,.3); flex-shrink: 0; }
+.summary-bar-val {
+  color: rgba(255,255,255,.8);
+  overflow: hidden; text-overflow: ellipsis; font-weight: 600;
+}
+.summary-bar-total { flex-shrink: 0; text-align: right; }
+.summary-bar-total-label { font-size: .62rem; color: rgba(255,255,255,.3); }
+.summary-bar-total-amount {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; color: #f59e0b; font-size: 1rem;
+}
+
+/* OuraStore "Pesan Sekarang!" gold/tan button */
+.summary-bar-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #c8924a, #d4a055);
+  color: #fff;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; font-size: .9rem;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+  transition: opacity .2s;
+  box-shadow: 0 3px 12px rgba(180,130,60,.4);
+}
+.summary-bar-btn::before {
+  content: '🛒';
+  font-size: .85rem;
+}
+.summary-bar-btn:hover { opacity: .9; }
+.summary-bar-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+@media (max-width: 380px) {
+  .summary-bar-btn { padding: 10px 13px; font-size: .82rem; }
+  .summary-bar-total-amount { font-size: .9rem; }
+}

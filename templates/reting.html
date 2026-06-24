@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Rating - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+.reting-wrap { max-width: 680px; margin: 0 auto; padding: 100px 16px 60px; }
+.reting-header { background: var(--card-bg); border: 1px solid rgba(var(--purple-rgb),0.3); border-radius: 20px; padding: 24px; margin-bottom: 24px; }
+.reting-app-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.reting-app-icon { width: 64px; height: 64px; background: linear-gradient(135deg,var(--purple),var(--cyan)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+.reting-app-name { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; }
+.reting-app-sub { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-top: 4px; }
+.reting-score-row { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.reting-big-score { font-family: 'Orbitron', monospace; font-size: 3.8rem; font-weight: 900; color: #fff; line-height: 1; }
+.reting-stars-avg { display: flex; gap: 3px; margin: 6px 0 4px; }
+.reting-stars-avg span { font-size: 1.3rem; }
+.reting-total-label { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+.reting-bars { flex: 1; min-width: 180px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+.bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--gold); border-radius: 4px; transition: width 0.6s ease; }
+.bar-label { min-width: 10px; text-align: right; }
+
+/* Filter tabs */
+.filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-tab { padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 0.82rem; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; }
+.filter-tab.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+.filter-tab:hover:not(.active) { border-color: rgba(var(--purple-glow-rgb),0.5); color: #fff; }
+
+/* Review cards */
+.review-list { display: flex; flex-direction: column; gap: 1px; }
+.review-item { background: var(--card-bg); border: 1px solid rgba(var(--purple-rgb),0.15); border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+.review-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.review-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,var(--purple),var(--purple-glow)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; flex-shrink: 0; }
+.review-meta { flex: 1; }
+.review-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
+.review-date { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+.review-stars { display: flex; gap: 2px; margin-bottom: 8px; }
+.review-stars span { font-size: 1rem; }
+.review-text { font-size: 0.92rem; color: rgba(255,255,255,0.75); line-height: 1.6; }
+.review-reply { margin-top: 14px; background: rgba(var(--purple-rgb),0.1); border-left: 3px solid var(--purple); border-radius: 0 10px 10px 0; padding: 12px 14px; }
+.review-reply-label { font-size: 0.75rem; color: var(--purple-glow); font-weight: 700; margin-bottom: 6px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
+.review-reply-text { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
+
+/* Write review form */
+.write-review-btn { display: block; width: 100%; padding: 14px; background: rgba(var(--purple-rgb),0.12); border: 1px dashed rgba(var(--purple-rgb),0.4); border-radius: 14px; color: var(--purple-glow); font-size: 0.95rem; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; text-align: center; margin-bottom: 24px; transition: all 0.2s; }
+.write-review-btn:hover { background: rgba(var(--purple-rgb),0.2); border-color: var(--purple-glow); }
+.review-form-box { background: var(--card-bg); border: 1px solid rgba(var(--purple-rgb),0.3); border-radius: 20px; padding: 24px; margin-bottom: 24px; display: none; }
+.review-form-box.open { display: block; }
+.review-form-box label { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; margin-top: 14px; }
+.review-form-box label:first-child { margin-top: 0; }
+.review-form-box input, .review-form-box textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(var(--purple-rgb),0.3); border-radius: 10px; padding: 10px 14px; color: #fff; font-family: 'Nunito', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s; }
+.review-form-box input:focus, .review-form-box textarea:focus { border-color: var(--purple); }
+.review-form-box textarea { resize: vertical; min-height: 90px; }
+.star-select { display: flex; gap: 8px; margin-bottom: 4px; }
+.star-select span { font-size: 1.8rem; cursor: pointer; transition: transform 0.15s; filter: grayscale(1) brightness(0.5); }
+.star-select span.lit { filter: none; }
+.star-select span:hover { transform: scale(1.2); }
+.btn-submit-review { width: 100%; padding: 12px; background: linear-gradient(135deg,var(--purple),var(--purple-glow)); border: none; border-radius: 10px; color: #fff; font-weight: 700; font-size: 0.95rem; font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 16px; transition: opacity 0.2s; }
+.btn-submit-review:hover { opacity: 0.85; }
+.success-banner { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 12px; padding: 12px 18px; color: #4ade80; font-size: 0.9rem; margin-bottom: 18px; }
+.empty-state { text-align: center; padding: 40px 0; color: rgba(255,255,255,0.3); font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">{{ t('nav_home') }}</a>
+      <a href="{{ url_for('game') }}">{{ t('nav_games') }}</a>
+      <a href="{{ url_for('reting') }}">{{ t('nav_rating') }}</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">{{ t('nav_status') }}</a>
+      <a href="{{ url_for('kritik') }}">{{ t('nav_critique') }}</a>
+      <a href="{{ url_for('saran') }}">{{ t('nav_suggestion') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">{{ t('nav_logout') }}</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+  <div class="reting-wrap">
+
+    <!-- App info + average score -->
+    <div class="reting-header">
+      <div class="reting-app-row">
+        <div class="reting-app-icon">&#9670;</div>
+        <div>
+          <div class="reting-app-name">TrustTop Up</div>
+          <div class="reting-app-sub">{{ t('reting_app_sub') }}</div>
+        </div>
+      </div>
+      <div class="reting-score-row">
+        <div>
+          <div class="reting-big-score">{{ avg if total > 0 else '-' }}</div>
+          <div class="reting-stars-avg">
+            {% for i in range(1, 6) %}
+              {% if avg >= i %}
+                <span style="color:var(--gold);">&#9733;</span>
+              {% elif avg >= i - 0.5 %}
+                <span style="color:var(--gold); opacity:0.6;">&#9733;</span>
+              {% else %}
+                <span style="color:rgba(255,255,255,0.15);">&#9733;</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="reting-total-label">{{ total }} {{ t('reting_reviews_count') }}</div>
+        </div>
+        <div class="reting-bars">
+          {% for star in [5,4,3,2,1] %}
+          <div class="bar-row">
+            <span class="bar-label">{{ star }}</span>
+            <span style="color:var(--gold);font-size:0.75rem;">&#9733;</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:{{ ((dist[star] / total * 100) | int) if total > 0 else 0 }}%;"></div>
+            </div>
+            <span style="min-width:22px;text-align:right;">{{ dist[star] }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Write review button -->
+    {% if success %}
+    <div class="success-banner">{{ t('reting_success_msg') }}</div>
+    {% endif %}
+
+    <button class="write-review-btn" onclick="toggleForm()" id="write-btn">+ {{ t('reting_write_btn') }}</button>
+
+    <!-- Write review form -->
+    <div class="review-form-box" id="review-form">
+      <form method="POST" action="{{ url_for('reting') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>{{ t('rating_name') }}</label>
+        <input type="text" name="name" placeholder="{{ t('rating_name') }}" maxlength="80" required>
+        <label>{{ t('reting_choose_star') }}</label>
+        <div class="star-select" id="star-select">
+          <span data-v="1" onclick="setStar(1)">&#9733;</span>
+          <span data-v="2" onclick="setStar(2)">&#9733;</span>
+          <span data-v="3" onclick="setStar(3)">&#9733;</span>
+          <span data-v="4" onclick="setStar(4)">&#9733;</span>
+          <span data-v="5" onclick="setStar(5)">&#9733;</span>
+        </div>
+        <input type="hidden" name="bintang" id="bintang-val" value="5">
+        <label>{{ t('rating_message') }}</label>
+        <textarea name="isi" placeholder="{{ t('rating_message_ph') }}" maxlength="500" required></textarea>
+        <button type="submit" class="btn-submit-review">{{ t('rating_submit') }}</button>
+      </form>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterReviews('all', this)">{{ t('reting_filter_all') }}</button>
+      <button class="filter-tab" onclick="filterReviews(5, this)">5 &#9733;</button>
+      <button class="filter-tab" onclick="filterReviews(4, this)">4 &#9733;</button>
+      <button class="filter-tab" onclick="filterReviews(3, this)">3 &#9733;</button>
+      <button class="filter-tab" onclick="filterReviews(2, this)">2 &#9733;</button>
+      <button class="filter-tab" onclick="filterReviews(1, this)">1 &#9733;</button>
+    </div>
+
+    <!-- Review list -->
+    <div class="review-list" id="review-list">
+      {% if ratings %}
+        {% for r in ratings %}
+        <div class="review-item" data-stars="{{ r.bintang }}">
+          <div class="review-top">
+            <div class="review-avatar">{{ r.name[0].upper() }}</div>
+            <div class="review-meta">
+              <div class="review-name">{{ r.name }}</div>
+              <div class="review-date">{{ r.created_at[:10] if r.created_at else '' }}</div>
+            </div>
+          </div>
+          <div class="review-stars">
+            {% for i in range(1, 6) %}
+              {% if i <= r.bintang %}
+                <span style="color:var(--gold);">&#9733;</span>
+              {% else %}
+                <span style="color:rgba(255,255,255,0.15);">&#9733;</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="review-text">{{ r.isi }}</div>
+          {% if r.admin_reply %}
+          <div class="review-reply">
+            <div class="review-reply-label">{{ t('rating_admin_reply') }}</div>
+            <div class="review-reply-text">{{ r.admin_reply }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">{{ t('rating_no_reviews') }}</div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()">&#10005;</button>
+    <div class="modal-title">{{ t('nav_donate') }}</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">
+      {{ t('reting_donate_desc') }}
+    </div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">{{ t('btn_close') }}</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+const writeBtnLabel = "+ {{ t('reting_write_btn') }}";
+const cancelBtnLabel = "{{ t('reting_cancel_btn') }}";
+function toggleForm() {
+  const box = document.getElementById('review-form');
+  const btn = document.getElementById('write-btn');
+  box.classList.toggle('open');
+  btn.textContent = box.classList.contains('open') ? cancelBtnLabel : writeBtnLabel;
+}
+function setStar(v) {
+  document.getElementById('bintang-val').value = v;
+  document.querySelectorAll('#star-select span').forEach((s, i) => {
+    s.classList.toggle('lit', i < v);
+  });
+}
+setStar(5);
+function filterReviews(val, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.review-item').forEach(item => {
+    if (val === 'all' || parseInt(item.dataset.stars) === val) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+function toggleMenu() { const m=document.getElementById('dotsMenu'); if(m) m.classList.toggle('open'); }
+function openDonate(e) { if(e) e.preventDefault(); const d=document.getElementById('donate-modal'); if(d) d.classList.add('open'); }
+function closeDonate() { const d=document.getElementById('donate-modal'); if(d) d.classList.remove('open'); }
+document.addEventListener('click',(e)=>{ const menu=document.getElementById('dotsMenu'); const btn=document.getElementById('dotsBtn'); if(menu&&btn&&!menu.contains(e.target)&&e.target!==btn) menu.classList.remove('open'); });
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

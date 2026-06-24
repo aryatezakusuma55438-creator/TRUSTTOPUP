@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+.policy-wrap{max-width:720px;margin:0 auto;padding:100px 16px 60px;}
+.policy-hero{background:linear-gradient(135deg,rgba(var(--purple-rgb),0.15),rgba(var(--cyan-rgb),0.08));border:1px solid rgba(var(--purple-rgb),0.3);border-radius:24px;padding:32px 24px;margin-bottom:24px;text-align:center;}
+.policy-title{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:8px;}
+.policy-sub{color:rgba(255,255,255,0.45);font-size:0.85rem;}
+.faq-card{background:var(--card-bg);border:1px solid rgba(var(--purple-rgb),0.18);border-radius:18px;padding:22px;margin-bottom:14px;}
+.faq-q{font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;color:var(--purple-glow);margin-bottom:8px;}
+.faq-a{color:rgba(255,255,255,0.6);font-size:0.9rem;line-height:1.75;}
+.faq-a ul{padding-left:18px;margin-top:6px;}
+.faq-a li{margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">Home</a>
+      <a href="{{ url_for('game') }}">Games</a>
+      <a href="{{ url_for('reting') }}">Ratings</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">Order Status</a>
+      <a href="{{ url_for('kritik') }}">Kritik</a>
+      <a href="{{ url_for('saran') }}">Saran</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">Donate</a>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">Logout</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">Donate</a>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+
+{% if current_lang == 'id' %}
+    <div class="policy-wrap">
+    <div class="policy-hero">
+      <div class="policy-title">Pertanyaan yang Sering Diajukan</div>
+      <div class="policy-sub">Temukan jawaban untuk pertanyaan umum tentang TrustTop Up.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Bagaimana cara melakukan pemesanan?</div>
+      <div class="faq-a">Mudah! Pilih game kamu dari halaman Games, masukkan User ID dan Server ID (jika diperlukan), pilih paket diamond/item yang kamu mau, lalu lanjutkan ke pembayaran. Setelah pembayaran dikonfirmasi, pesanan kamu akan diproses secara otomatis.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Berapa lama waktu pengiriman?</div>
+      <div class="faq-a">Kebanyakan pesanan diproses dan dikirim dalam beberapa menit setelah konfirmasi pembayaran. Dalam beberapa kasus, pengiriman bisa memakan waktu hingga 30 menit tergantung waktu respons server game dan beban sistem saat ini. Jika pesanan kamu belum terkirim setelah 1 jam, silakan hubungi tim dukungan kami.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Metode pembayaran apa yang diterima?</div>
+      <div class="faq-a">Kami mendukung berbagai metode pembayaran melalui payment gateway kami, termasuk:
+        <ul>
+          <li>Transfer bank (BCA, BNI, BRI, Mandiri)</li>
+          <li>QRIS (semua e-wallet)</li>
+          <li>GoPay, OVO, Dana, ShopeePay</li>
+          <li>Indomaret &amp; Alfamart</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Bagaimana jika saya salah memasukkan User ID atau Server ID?</div>
+      <div class="faq-a">Mohon pastikan informasi game kamu benar sebelum menyelesaikan pembayaran. Jika kamu memasukkan ID yang salah, top up bisa terkirim ke akun yang salah. TrustTop Up tidak bertanggung jawab atas pengiriman yang gagal atau salah arah akibat informasi yang salah dimasukkan oleh pengguna. Periksa kembali ID kamu di dalam game sebelum melakukan pemesanan.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Bisakah saya membatalkan pesanan setelah pembayaran?</div>
+      <div class="faq-a">Pesanan yang sudah diproses atau dikirim tidak dapat dibatalkan. Jika pesanan kamu belum diproses, silakan segera hubungi tim dukungan kami via WhatsApp di 0822-5818-5709 atau email support@trusttopup.com. Kami akan melakukan yang terbaik untuk membantu kamu.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Bagaimana cara mengecek status pesanan saya?</div>
+      <div class="faq-a">Kamu bisa mengecek status pesanan kapan saja dengan mengunjungi halaman Status Pesanan dan memasukkan Order ID kamu. Kamu juga bisa melihat riwayat pesanan lengkap di halaman Riwayat Pesanan.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Apakah pembayaran dan data pribadi saya aman?</div>
+      <div class="faq-a">Ya. TrustTop Up menggunakan sistem keamanan berlapis termasuk koneksi terenkripsi (HTTPS), perlindungan CSRF, dan payment gateway terpercaya untuk melindungi transaksi dan data kamu. Kami tidak menyimpan detail kartu pembayaran kamu di server kami.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Apa yang harus saya lakukan jika pembayaran berhasil tetapi item tidak diterima?</div>
+      <div class="faq-a">Mohon tunggu hingga 1 jam, karena beberapa penyedia game mungkin mengalami keterlambatan. Jika item masih belum masuk, hubungi tim dukungan kami dengan Order ID dan bukti pembayaran kamu via WhatsApp (0822-5818-5709) atau email (support@trusttopup.com). Kami akan menyelidiki dan menyelesaikan masalahnya secepat mungkin.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Apakah harga di TrustTop Up resmi?</div>
+      <div class="faq-a">Harga kami ditetapkan oleh TrustTop Up dan mungkin berbeda dari harga toko resmi di dalam game. Kami berusaha menawarkan harga yang kompetitif. Semua harga ditampilkan dalam Rupiah Indonesia (IDR) dan sudah termasuk biaya layanan yang berlaku.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Bagaimana cara menghubungi dukungan?</div>
+      <div class="faq-a">Kamu bisa menghubungi tim dukungan kami melalui:
+        <ul>
+          <li>WhatsApp: 0822-5818-5709</li>
+          <li>Email: support@trusttopup.com</li>
+          <li>Halaman Lapor Bug di website ini</li>
+        </ul>
+        Jam operasional kami adalah Senin-Jumat 08:00-22:00 WIB dan Sabtu-Minggu 09:00-21:00 WIB.
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; Kembali ke Beranda</a>
+    </div>
+  </div>
+{% else %}
+  <div class="policy-wrap">
+    <div class="policy-hero">
+      <div class="policy-title">Frequently Asked Questions</div>
+      <div class="policy-sub">Find answers to the most common questions about TrustTop Up.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">How do I place an order?</div>
+      <div class="faq-a">It's simple! Select your game from our Games page, enter your User ID and Server ID (if required), choose the diamond/item package you want, then proceed to payment. Once payment is confirmed, your order will be processed automatically.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">How long does delivery take?</div>
+      <div class="faq-a">Most orders are processed and delivered within a few minutes after payment confirmation. In some cases, delivery may take up to 30 minutes depending on the game server's response time and current system load. If your order has not been delivered after 1 hour, please contact our support team.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">What payment methods are accepted?</div>
+      <div class="faq-a">We support a wide range of payment methods through our payment gateway, including:
+        <ul>
+          <li>Bank transfer (BCA, BNI, BRI, Mandiri)</li>
+          <li>QRIS (all e-wallets)</li>
+          <li>GoPay, OVO, Dana, ShopeePay</li>
+          <li>Indomaret &amp; Alfamart</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">What if I entered the wrong User ID or Server ID?</div>
+      <div class="faq-a">Please make absolutely sure your game information is correct before completing payment. If you entered the wrong ID, the top-up may be delivered to the wrong account. TrustTop Up is not responsible for failed or misdirected deliveries due to incorrect information entered by the user. Double-check your ID in-game before placing an order.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Can I cancel my order after payment?</div>
+      <div class="faq-a">Orders that have already been processed or delivered cannot be cancelled. If your order has not yet been processed, please contact our support team immediately via WhatsApp at 0822-5818-5709 or email support@trusttopup.com. We will do our best to assist you.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">How do I check my order status?</div>
+      <div class="faq-a">You can check your order status anytime by visiting the Order Status page and entering your Order ID. You can also view your full order history on the Order History page.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Is my payment and personal data secure?</div>
+      <div class="faq-a">Yes. TrustTop Up uses a multi-layered security system including encrypted connections (HTTPS), CSRF protection, and a trusted payment gateway to protect your transactions and data. We do not store your payment card details on our servers.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">What should I do if my payment was successful but I didn't receive the items?</div>
+      <div class="faq-a">Please wait up to 1 hour, as some game providers may have delays. If items still haven't arrived, contact our support team with your Order ID and payment proof via WhatsApp (0822-5818-5709) or email (support@trusttopup.com). We will investigate and resolve the issue as quickly as possible.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">Are the prices on TrustTop Up official?</div>
+      <div class="faq-a">Our prices are set by TrustTop Up and may differ from official in-game store prices. We aim to offer competitive pricing. All prices are displayed in Indonesian Rupiah (IDR) and are inclusive of any applicable service fees.</div>
+    </div>
+
+    <div class="faq-card">
+      <div class="faq-q">How do I contact support?</div>
+      <div class="faq-a">You can reach our support team through:
+        <ul>
+          <li>WhatsApp: 0822-5818-5709</li>
+          <li>Email: support@trusttopup.com</li>
+          <li>Report Bug page on this website</li>
+        </ul>
+        Our operating hours are Monday–Friday 08:00–22:00 WIB and Saturday–Sunday 09:00–21:00 WIB.
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()"></button>
+    <div class="modal-title">Donate</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">Your donation means a lot to us. Thank you!</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">Close</button>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+function toggleMenu(){const m=document.getElementById('dotsMenu');if(m)m.classList.toggle('open');}
+function openDonate(e){if(e)e.preventDefault();const d=document.getElementById('donate-modal');if(d)d.classList.add('open');}
+function closeDonate(){const d=document.getElementById('donate-modal');if(d)d.classList.remove('open');}
+document.addEventListener('click',(e)=>{const menu=document.getElementById('dotsMenu');const btn=document.getElementById('dotsBtn');if(menu&&btn&&!menu.contains(e.target)&&e.target!==btn)menu.classList.remove('open');});
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

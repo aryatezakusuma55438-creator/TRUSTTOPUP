@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Checkout - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+/* ===== CHECKOUT OURASTORE STYLE ===== */
+.co-wrap { max-width:520px; margin:0 auto; padding:76px 12px 100px; }
+
+/* Step card — dark bg with gold number badge like OuraStore */
+.co-step {
+  background:#1e1e2e;
+  border-radius:16px;
+  margin-bottom:12px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+}
+.co-step-head {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px;
+  background:#2a2a3d;
+}
+.co-step-num {
+  width:28px; height:28px; border-radius:8px;
+  background:linear-gradient(135deg,#7c3aed,#06b6d4);
+  color:#fff; font-family:'Orbitron',monospace;
+  font-size:.8rem; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.co-step-label {
+  font-family:'Rajdhani',sans-serif; font-size:1rem;
+  font-weight:700; color:#fff; letter-spacing:.4px;
+}
+.co-step-body { padding:16px; }
+
+/* Order summary rows */
+.co-row { display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:.88rem; }
+.co-row:last-child { border-bottom:none; }
+.co-label { color:rgba(255,255,255,.45); }
+.co-val { color:#fff; font-weight:600; text-align:right; }
+.co-total { font-family:'Orbitron',monospace; font-size:1.1rem;
+  color:#f59e0b; font-weight:700; }
+
+/* Payment info box */
+.pay-box {
+  background:rgba(124,58,237,.08);
+  border:1px solid rgba(124,58,237,.25);
+  border-radius:12px; padding:16px; text-align:center; margin-bottom:14px;
+}
+.pay-number {
+  font-family:'Orbitron',monospace; font-size:1.2rem;
+  color:#a855f7; font-weight:700; margin:8px 0; word-break:break-all;
+}
+.pay-name { color:rgba(255,255,255,.45); font-size:.82rem; }
+.pay-amount { font-size:.95rem; color:#f59e0b; font-weight:700; margin-top:8px; }
+.copy-btn {
+  background:rgba(124,58,237,.2); border:1px solid rgba(168,85,247,.3);
+  color:#a855f7; padding:5px 12px; border-radius:7px;
+  font-size:.75rem; cursor:pointer; font-weight:700;
+  margin-left:6px; transition:background .2s;
+}
+.copy-btn:hover { background:rgba(124,58,237,.4); }
+.qris-img { max-width:200px; border-radius:12px;
+  border:2px solid rgba(168,85,247,.3); }
+
+/* Step list */
+.how-steps { display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
+.how-step { display:flex; align-items:flex-start; gap:10px;
+  font-size:.85rem; color:rgba(255,255,255,.65); line-height:1.45; }
+.how-num {
+  width:20px; height:20px; border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#06b6d4);
+  color:#fff; font-size:.7rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; margin-top:2px;
+}
+
+/* Upload area */
+.upload-area {
+  border:2px dashed rgba(124,58,237,.35);
+  border-radius:12px; padding:22px 16px; text-align:center;
+  cursor:pointer; transition:border-color .2s; margin-bottom:12px;
+}
+.upload-area:hover { border-color:#a855f7; }
+.upload-area input { display:none; }
+
+/* Countdown timer */
+.timer-badge {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  background:rgba(239,68,68,.08);
+  border:1px solid rgba(239,68,68,.25);
+  border-radius:10px; padding:10px 16px; margin-bottom:0;
+}
+.timer-val { font-family:'Orbitron',monospace; font-size:1.3rem;
+  color:#f87171; font-weight:700; }
+.timer-lbl { font-size:.78rem; color:rgba(255,255,255,.4); }
+
+/* Sticky bottom bar like OuraStore */
+.co-bottom-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  background:#111118; border-top:1px solid rgba(255,255,255,.08);
+  padding:10px 16px 14px; z-index:100;
+  display:flex; align-items:center; gap:10px;
+}
+.co-bottom-info { flex:1; }
+.co-bottom-total { font-size:.75rem; color:rgba(255,255,255,.4); }
+.co-bottom-price { font-family:'Orbitron',monospace; font-size:1rem;
+  color:#f59e0b; font-weight:700; }
+.co-bottom-btn {
+  padding:12px 24px; border-radius:12px; border:none; cursor:pointer;
+  font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700;
+  letter-spacing:.4px; white-space:nowrap; transition:all .2s;
+}
+.btn-upload { background:linear-gradient(135deg,#7c3aed,#06b6d4); color:#fff; }
+.btn-upload:hover { opacity:.9; }
+.btn-confirm { background:rgba(34,197,94,.15);
+  border:1px solid rgba(34,197,94,.3); color:#4ade80; }
+.btn-confirm:hover { background:rgba(34,197,94,.25); }
+
+/* Warning notice */
+.notice-warning {
+  background:rgba(249,115,22,.07);
+  border:1px solid rgba(249,115,22,.25);
+  border-radius:10px; padding:10px 14px;
+  font-size:.78rem; color:#fdba74; line-height:1.45; margin-bottom:10px;
+}
+/* divider */
+.divider-or { text-align:center; color:rgba(255,255,255,.25);
+  font-size:.78rem; margin:12px 0; position:relative; }
+.divider-or::before,.divider-or::after { content:''; position:absolute;
+  top:50%; width:42%; height:1px; background:rgba(255,255,255,.08); }
+.divider-or::before{left:0;} .divider-or::after{right:0;}
+
+/* Section label inside step */
+.co-section-label {
+  font-size:.72rem; font-weight:700; color:rgba(255,255,255,.35);
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;
+}
+</style>
+</head>
+<body>
+{% include '_pending_banner.html' %}
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+    <div class="nav-left">
+      <a href="{{ url_for('index') }}?skip=1" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">Home</a>
+      <a href="{{ url_for('game') }}">Games</a>
+      <a href="{{ url_for('reting') }}">Ratings</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">Order Status</a>
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">Logout</a>
+    </div>
+    <div class="nav-center"></div>
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+  {% else %}
+  <nav>
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+    <div class="nav-left">
+      <a href="{{ url_for('index') }}?skip=1" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('login') }}">{{ t('nav_login') }}</a>
+      <a href="{{ url_for('login') }}">{{ t('nav_register') }}</a>
+    </div>
+    <div class="nav-center"></div>
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <div class="co-wrap">
+
+    <!-- ① Order Summary -->
+    <div class="co-step">
+      <div class="co-step-head">
+        <div class="co-step-num">1</div>
+        <div class="co-step-label">Order Summary</div>
+      </div>
+      <div class="co-step-body">
+        <div class="co-row"><span class="co-label">Order ID</span><span class="co-val">#{{ order.id }}</span></div>
+        <div class="co-row"><span class="co-label">Game</span><span class="co-val">{{ order.game }}</span></div>
+        <div class="co-row"><span class="co-label">Player ID</span><span class="co-val">{{ order.user_id }}{% if order.server_id %} / {{ order.server_id }}{% endif %}</span></div>
+        <div class="co-row"><span class="co-label">Package</span><span class="co-val" style="color:var(--cyan);">{{ order.diamond }}</span></div>
+        {% if order.voucher_code %}
+        <div class="co-row"><span class="co-label">Subtotal</span><span class="co-val">Rp {{ '{:,.0f}'.format(order.original_price_int).replace(',', '.') }}</span></div>
+        <div class="co-row"><span class="co-label">Voucher ({{ order.voucher_code }})</span><span class="co-val" style="color:#4ade80;">− Rp {{ '{:,.0f}'.format(order.discount_amount).replace(',', '.') }}</span></div>
+        {% endif %}
+        <div class="co-row"><span class="co-label">Total</span><span class="co-val co-total">{{ order.price }}</span></div>
+      </div>
+    </div>
+
+    <!-- ② Payment Time Limit -->
+    <div class="co-step">
+      <div class="co-step-head">
+        <div class="co-step-num">2</div>
+        <div class="co-step-label">Time Remaining</div>
+      </div>
+      <div class="co-step-body">
+        <div class="timer-badge">
+          <div>
+            <div class="timer-val" id="countdown">15:00</div>
+            <div class="timer-lbl">Complete payment before this expires</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ Payment Method -->
+    <div class="co-step">
+      <div class="co-step-head">
+        <div class="co-step-num">3</div>
+        <div class="co-step-label">Payment Method</div>
+      </div>
+      <div class="co-step-body">
+
+        {% if order.payment == 'QRIS' %}
+        <!-- QRIS -->
+        <div class="co-section-label">Scan QRIS</div>
+        <div class="pay-box">
+          <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:10px;">
+            Supports GoPay · OVO · Dana · ShopeePay · BCA · and more
+          </div>
+          <img src="{{ url_for('static', filename=qris_image) }}" alt="QRIS TrustTop Up" class="qris-img">
+          <div class="pay-amount">Total: {{ order.price }}</div>
+        </div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><span>Open your e-wallet app (GoPay, OVO, Dana, ShopeePay, etc.)</span></div>
+          <div class="how-step"><div class="how-num">2</div><span>Tap <strong>"Pay / Scan QR"</strong> and scan the code above</span></div>
+          <div class="how-step"><div class="how-num">3</div><span>Enter exact amount: <strong style="color:#f59e0b;">{{ order.price }}</strong></span></div>
+          <div class="how-step"><div class="how-num">4</div><span>Complete payment and <strong>take a screenshot</strong></span></div>
+          <div class="how-step"><div class="how-num">5</div><span>Upload the screenshot in Step 4 below</span></div>
+        </div>
+
+        {% else %}
+        <!-- Dana Transfer -->
+        <div class="co-section-label">Transfer Dana</div>
+        <div class="pay-box">
+          <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:4px;">Send Dana to this number</div>
+          <div class="pay-number" id="dana-number">
+            {{ dana_number }}
+            <button class="copy-btn" onclick="copyText('{{ dana_number }}')">Copy</button>
+          </div>
+          <div class="pay-name">a.n. {{ dana_name }}</div>
+          <div class="pay-amount">Total: {{ order.price }}</div>
+        </div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><span>Open the <strong>Dana</strong> app on your phone</span></div>
+          <div class="how-step"><div class="how-num">2</div><span>Tap <strong>"Send Money"</strong> and enter the number above</span></div>
+          <div class="how-step"><div class="how-num">3</div><span>Enter exact amount: <strong style="color:#f59e0b;">{{ order.price }}</strong></span></div>
+          <div class="how-step"><div class="how-num">4</div><span>Complete transfer and <strong>take a screenshot</strong></span></div>
+          <div class="how-step"><div class="how-num">5</div><span>Upload the screenshot in Step 4 below</span></div>
+        </div>
+        {% endif %}
+
+        <!-- Manual payment notice -->
+        <div class="notice-warning">
+          ⚠️ <strong>Manual Payment:</strong> After uploading your payment proof, our staff will verify and process your order. This usually takes <strong>1–15 minutes</strong>. You'll receive a notification once approved.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ④ Upload Payment Proof -->
+    <div class="co-step">
+      <div class="co-step-head">
+        <div class="co-step-num">4</div>
+        <div class="co-step-label">Upload Payment Proof</div>
+      </div>
+      <div class="co-step-body">
+
+        <form method="POST" action="{{ url_for('upload_proof', order_id=order.id) }}" enctype="multipart/form-data" id="upload-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="token" value="{{ order.token }}">
+          <input type="hidden" name="payment_method" class="payment-method-field" value="{{ order.payment if order.payment in ['Dana','QRIS'] else 'Dana' }}">
+
+          <div class="upload-area" onclick="document.getElementById('proof-file').click()" id="drop-area">
+            <input type="file" name="proof" id="proof-file" accept="image/*" onchange="previewFile(this)">
+            <div id="upload-placeholder">
+              <div style="font-size:2.2rem;margin-bottom:8px;">🧾</div>
+              <div style="color:rgba(255,255,255,.65);font-size:.9rem;font-weight:600;">Tap to upload payment screenshot</div>
+              <div style="color:rgba(255,255,255,.3);font-size:.75rem;margin-top:4px;">JPG · PNG · GIF — max 10MB</div>
+            </div>
+            <img id="preview-img" style="display:none;max-width:100%;border-radius:10px;margin-top:8px;">
+          </div>
+
+          <!-- Upload button in sticky bar — submit via JS -->
+          <button type="submit" class="co-bottom-btn btn-upload" id="btn-upload-proof" style="width:100%;padding:14px;border-radius:12px;font-size:1rem;margin-top:4px;">
+            ✓ Upload &amp; Confirm Payment
+          </button>
+        </form>
+
+        <div class="divider-or">OR</div>
+
+        <div class="notice-warning" style="margin-bottom:10px;">
+          ⚠️ Orders without screenshot will be processed more slowly and require manual verification by staff.
+        </div>
+
+        <form method="POST" action="{{ url_for('confirm_paid', order_id=order.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="token" value="{{ order.token }}">
+          <input type="hidden" name="payment_method" class="payment-method-field" value="{{ order.payment if order.payment in ['Dana','QRIS'] else 'Dana' }}">
+          <button type="submit" style="width:100%;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:13px;border-radius:10px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.92rem;">
+            I Have Paid (no screenshot)
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('cancel_order', order_id=order.id) }}" onsubmit="return confirm('Cancel this order? This cannot be undone.');" style="margin-top:8px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="token" value="{{ order.token }}">
+          <button type="submit" style="width:100%;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.25);color:#f87171;padding:12px;border-radius:10px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;">Cancel Order</button>
+        </form>
+
+        <div style="text-align:center;margin-top:14px;">
+          <a href="{{ url_for('status', order_id=order.id, token=order.token) }}" style="color:var(--purple-glow);font-size:.85rem;">🔍 Check Order Status</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /co-wrap -->
+</div><!-- /main-site -->
+
+<!-- Sticky bottom summary bar -->
+<div class="co-bottom-bar">
+  <div class="co-bottom-info">
+    <div class="co-bottom-total">{{ order.game }} · {{ order.diamond }}</div>
+    <div class="co-bottom-price">{{ order.price }}</div>
+  </div>
+  <a href="{{ url_for('status', order_id=order.id, token=order.token) }}" class="co-bottom-btn" style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#a855f7;text-decoration:none;font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;padding:10px 14px;border-radius:10px;">
+    Check Status
+  </a>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()"></button>
+    <div class="modal-title">Donate</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">Close</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>{
+    event.target.textContent='Copied!';
+    setTimeout(()=>event.target.textContent='Copy',2000);
+  });
+}
+function previewFile(input){
+  if(input.files&&input.files[0]){
+    const r=new FileReader();
+    r.onload=e=>{
+      document.getElementById('preview-img').src=e.target.result;
+      document.getElementById('preview-img').style.display='block';
+      document.getElementById('upload-placeholder').style.display='none';
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+// Countdown 15 min
+let timeLeft=15*60;
+function updateTimer(){
+  const m=Math.floor(timeLeft/60), s=timeLeft%60;
+  document.getElementById('countdown').textContent=
+    String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  if(timeLeft<=0){document.getElementById('countdown').style.color='#ef4444';return;}
+  timeLeft--; setTimeout(updateTimer,1000);
+}
+updateTimer();
+// Nav
+function toggleMenu(){const m=document.getElementById('dotsMenu'),o=document.getElementById('navOverlay');if(!m)return;const open=m.classList.contains('open');if(open){m.classList.remove('open');if(o)o.classList.remove('open');}else{m.classList.add('open');if(o)o.classList.add('open');}}
+function closeMenu(){const m=document.getElementById('dotsMenu'),o=document.getElementById('navOverlay');if(m)m.classList.remove('open');if(o)o.classList.remove('open');}
+function openDonate(e){if(e)e.preventDefault();const d=document.getElementById('donate-modal');if(d)d.classList.add('open');}
+function closeDonate(){const d=document.getElementById('donate-modal');if(d)d.classList.remove('open');}
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

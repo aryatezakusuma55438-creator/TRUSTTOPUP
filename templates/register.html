@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg);
+  }
+  .login-box {
+    background: var(--card-bg);
+    border: 1px solid rgba(var(--purple-rgb),0.35);
+    border-radius: 24px;
+    padding: 48px 36px;
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+  }
+  .login-logo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .login-logo .logo-t {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--purple-glow), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .login-logo .logo-t1 { font-size: 2.4rem; }
+  .login-logo .logo-t2 { font-size: 1.5rem; margin-left: -4px; }
+  .login-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.88rem;
+    margin-bottom: 28px;
+  }
+  .login-field { text-align: left; margin-bottom: 14px; }
+  .login-field label {
+    display: block;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(var(--purple-rgb),0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .login-field input:focus { border-color: var(--purple-glow); }
+  .login-field-hint {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 5px;
+  }
+  .btn-submit-login {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    color: #fff;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-bottom: 18px;
+    margin-top: 8px;
+  }
+  .login-register-link {
+    margin-top: 22px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.45);
+  }
+  .login-register-link a { color: var(--purple-glow); font-weight: 700; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></div>
+    <div class="login-sub">Buat akun baru untuk mulai top up</div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#f87171;font-size:0.85rem;text-align:left;">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="login-field">
+        <label for="reg-name">Nama Lengkap</label>
+        <input type="text" id="reg-name" name="name" value="{{ form.get('name','') }}" required minlength="3" autocomplete="name">
+      </div>
+      <div class="login-field">
+        <label for="reg-username">Username</label>
+        <input type="text" id="reg-username" name="username" value="{{ form.get('username','') }}" required pattern="[a-zA-Z0-9_]{4,20}" autocomplete="username">
+        <div class="login-field-hint">4-20 karakter: huruf, angka, underscore.</div>
+      </div>
+      <div class="login-field">
+        <label for="reg-email">Alamat Email</label>
+        <input type="email" id="reg-email" name="email" value="{{ form.get('email','') }}" required autocomplete="email">
+      </div>
+      <div class="login-field">
+        <label for="reg-phone">Nomor WhatsApp (opsional)</label>
+        <input type="tel" id="reg-phone" name="phone" value="{{ form.get('phone','') }}" placeholder="08xxxxxxxxxx" autocomplete="tel">
+        <div class="login-field-hint">Dipakai admin buat hubungi kamu kalau ada masalah saat proses order.</div>
+      </div>
+      <div class="login-field">
+        <label for="reg-password">Kata Sandi</label>
+        <input type="password" id="reg-password" name="password" required minlength="8" autocomplete="new-password">
+        <div class="login-field-hint">Minimal 8 karakter.</div>
+      </div>
+      <div class="login-field">
+        <label for="reg-confirm">Konfirmasi Kata Sandi</label>
+        <input type="password" id="reg-confirm" name="confirm" required minlength="8" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn-submit-login">Daftar</button>
+    </form>
+
+    <div class="login-register-link">
+      Sudah punya akun? <a href="{{ url_for('login') }}">Masuk di sini</a>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

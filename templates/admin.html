@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>TrustTop Up — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0a14;color:#fff;font-family:'Nunito',sans-serif;display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:#0d0d1f;border-right:1px solid rgba(var(--purple-rgb),0.15);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.logo-brand{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:900;color:var(--purple-glow);letter-spacing:1px;}
+.logo-sub{font-size:0.68rem;color:rgba(255,255,255,0.3);margin-top:2px;letter-spacing:1.5px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.nav-section{padding:10px 20px 4px;font-size:0.6rem;color:rgba(255,255,255,0.2);letter-spacing:2px;font-weight:700;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:rgba(255,255,255,0.5);font-size:0.85rem;font-weight:600;border-left:3px solid transparent;transition:all 0.15s;text-decoration:none;}
+.nav-item:hover{color:#fff;background:rgba(var(--purple-rgb),0.08);}
+.nav-item.active{color:var(--purple-glow);background:rgba(var(--purple-rgb),0.12);border-left-color:var(--purple-glow);}
+.nav-icon{width:16px;font-size:0.85rem;opacity:0.8;}
+.nav-badge{background:#ef4444;color:#fff;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:10px;margin-left:auto;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,0.05);}
+.sidebar-user{font-size:0.78rem;color:rgba(255,255,255,0.4);margin-bottom:8px;}
+.sidebar-user strong{color:#fff;display:block;font-size:0.85rem;}
+.logout-btn{display:block;text-align:center;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#ef4444;border-radius:8px;padding:7px;font-size:0.8rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all 0.15s;}
+.logout-btn:hover{background:rgba(239,68,68,0.2);}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:#0d0d1f;border-bottom:1px solid rgba(var(--purple-rgb),0.15);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;color:#fff;}
+.topbar-sub{font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.live-clock{font-family:'Orbitron',monospace;font-size:0.8rem;color:var(--cyan);background:rgba(var(--cyan-rgb),0.08);border:1px solid rgba(var(--cyan-rgb),0.2);padding:5px 12px;border-radius:8px;}
+.admin-badge{background:rgba(var(--purple-rgb),0.15);border:1px solid rgba(var(--purple-rgb),0.25);border-radius:8px;padding:5px 12px;font-size:0.8rem;color:var(--purple-glow);font-weight:700;}
+
+.content{padding:24px 28px;flex:1;}
+
+/* TABS */
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:#0d0d1f;border:1px solid rgba(var(--purple-rgb),0.18);border-radius:16px;padding:20px;}
+.stat-label{font-size:0.75rem;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+.stat-value{font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;color:#fff;margin:8px 0 4px;}
+.stat-change{font-size:0.75rem;color:#4ade80;}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;float:right;margin-top:-44px;}
+
+/* GRID 2 COL */
+.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:24px;}
+.grid-2-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+
+/* CARDS */
+.card{background:#0d0d1f;border:1px solid rgba(var(--purple-rgb),0.18);border-radius:16px;padding:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:#fff;}
+.card-action{font-size:0.78rem;color:var(--purple-glow);cursor:pointer;background:none;border:none;font-family:'Nunito',sans-serif;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem;}
+.tbl th{text-align:left;padding:8px 10px;color:rgba(255,255,255,0.35);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.5px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(var(--purple-rgb),0.04);}
+
+/* BADGE */
+.badge{padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;font-family:'Rajdhani',sans-serif;}
+.badge-success{background:rgba(34,197,94,0.12);color:#4ade80;}
+.badge-pending{background:rgba(var(--gold-rgb),0.12);color:var(--gold);}
+.badge-failed{background:rgba(239,68,68,0.12);color:#ef4444;}
+.badge-info{background:rgba(var(--cyan-rgb),0.12);color:var(--cyan);}
+.badge-red{background:rgba(239,68,68,0.12);color:#ef4444;}
+.badge-claim{background:rgba(249,115,22,0.14);color:#fb923c;border:1px solid rgba(249,115,22,0.3);}
+
+/* STATUS DOT */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.dot-green{background:#4ade80;box-shadow:0 0 6px #4ade80;}
+.dot-red{background:#ef4444;}
+.dot-yellow{background:var(--gold);}
+
+/* CHART */
+#revenueChart{width:100%;height:200px;}
+
+/* SYSTEM STATUS */
+.sys-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.85rem;}
+.sys-item:last-child{border-bottom:none;}
+
+/* SERVER RESOURCE */
+.res-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.res-item:last-child{border-bottom:none;}
+.res-bar-wrap{flex:1;background:rgba(255,255,255,0.06);border-radius:4px;height:6px;}
+.res-bar{height:6px;border-radius:4px;transition:width 1s ease;}
+.res-label{font-size:0.8rem;color:rgba(255,255,255,0.5);width:80px;}
+.res-pct{font-size:0.8rem;font-weight:700;color:#fff;width:36px;text-align:right;}
+
+/* ACTIVITY FEED */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.activity-text{font-size:0.83rem;color:rgba(255,255,255,0.65);line-height:1.4;}
+.activity-time{font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:2px;}
+
+/* FORM */
+.form-input{background:rgba(255,255,255,0.05);border:1px solid rgba(var(--purple-rgb),0.2);border-radius:8px;color:#fff;padding:8px 12px;font-size:0.85rem;width:100%;font-family:'Nunito',sans-serif;}
+.form-input:focus{outline:none;border-color:var(--purple-glow);}
+.btn-primary{background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:0.83rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+.btn-sm{padding:4px 10px;font-size:0.75rem;border-radius:6px;}
+.btn-success{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#4ade80;cursor:pointer;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-family:'Nunito',sans-serif;}
+.btn-danger{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;cursor:pointer;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-family:'Nunito',sans-serif;}
+
+/* FLASH */
+.flash{padding:10px 16px;border-radius:10px;margin-bottom:16px;font-size:0.85rem;}
+.flash-success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:#4ade80;}
+.flash-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#ef4444;}
+
+/* OVERFLOW TABLE WRAP */
+.tbl-wrap{overflow-x:auto;}
+
+/* LOG suspicious */
+.log-suspicious td{background:rgba(239,68,68,0.05)!important;}
+
+@media(max-width:900px){
+  .sidebar{width:56px;}
+  .logo-brand,.logo-sub,.nav-item span:not(.nav-icon),.nav-section,.sidebar-footer .sidebar-user,.sidebar-footer span{display:none;}
+  .main{margin-left:56px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .grid-2,.grid-2-equal{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-brand">TrustTop Up</div>
+    <div class="logo-sub">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a class="nav-item active" onclick="showTab('dashboard',this)" href="#">
+      <span class="nav-icon">&#9632;</span><span>Dashboard</span>
+    </a>
+    <a class="nav-item" onclick="showTab('orders',this)" href="#">
+      <span class="nav-icon">&#9633;</span><span>Orders</span>
+      {% if stats.pending > 0 %}<span class="nav-badge">{{ stats.pending }}</span>{% endif %}
+    </a>
+    <div class="nav-section">Feedback</div>
+    <a class="nav-item" onclick="showTab('ratings',this)" href="#">
+      <span class="nav-icon">&#9671;</span><span>Ratings</span>
+    </a>
+    <a class="nav-item" onclick="showTab('reports',this)" href="#">
+      <span class="nav-icon">&#9650;</span><span>Reports</span>
+    </a>
+    <a class="nav-item" onclick="showTab('kritik',this)" href="#">
+      <span class="nav-icon">&#9660;</span><span>Kritik</span>
+    </a>
+    <a class="nav-item" onclick="showTab('saran',this)" href="#">
+      <span class="nav-icon">&#9670;</span><span>Saran</span>
+    </a>
+    <div class="nav-section">Monitoring</div>
+    <a class="nav-item" onclick="showTab('actlog',this)" href="#">
+      <span class="nav-icon">&#9642;</span><span>Activity Logs</span>
+      <span class="nav-badge" id="suspicious-count" style="display:none;"></span>
+    </a>
+    <a class="nav-item" onclick="showTab('adminlog',this)" href="#">
+      <span class="nav-icon">&#9643;</span><span>Admin Logs</span>
+    </a>
+    <div class="nav-section">Promotions</div>
+    <a class="nav-item" onclick="showTab('vouchers',this)" href="#">
+      <span class="nav-icon">&#9733;</span><span>Vouchers</span>
+    </a>
+    <div class="nav-section">Team</div>
+    <a class="nav-item" onclick="showTab('staffmgmt',this)" href="#">
+      <span class="nav-icon">&#9787;</span><span>Staff Accounts</span>
+    </a>
+    <div class="nav-section">Site</div>
+    <a class="nav-item" href="{{ url_for('index') }}" target="_blank">
+      <span class="nav-icon">&#9654;</span><span>Lihat Site</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <strong>Admin</strong>
+      Super Owner
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-sub" id="page-sub">Welcome back, Admin</div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-clock" id="live-clock">--:--:--</div>
+      <div id="last-updated" style="font-size:0.72rem;color:rgba(255,255,255,0.25);"></div>
+      <div class="admin-badge">Super Owner</div>
+    </div>
+  </div>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- ===== DASHBOARD TAB ===== -->
+    <div class="tab-content active" id="tab-dashboard">
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" id="stat-total">{{ stats.total_orders }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+            <span id="stat-orders-change" style="font-size:0.75rem;color:#4ade80;">vs last month</span>
+            <canvas id="spark-orders" width="80" height="32"></canvas>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value" id="stat-revenue" style="font-size:1.1rem;">{{ stats.revenue }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+            <span id="stat-revenue-change" style="font-size:0.75rem;color:#4ade80;">vs last month</span>
+            <canvas id="spark-revenue" width="80" height="32"></canvas>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="stat-users">0</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+            <span id="stat-users-change" style="font-size:0.75rem;color:#4ade80;">vs last month</span>
+            <canvas id="spark-users" width="80" height="32"></canvas>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Orders</div>
+          <div class="stat-value" id="stat-pending" style="color:var(--gold);">{{ stats.pending }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+            <span id="stat-pending-change" style="font-size:0.75rem;color:#4ade80;">vs last month</span>
+            <canvas id="spark-pending" width="80" height="32"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART + SYSTEM STATUS -->
+      <div class="grid-2">
+        <!-- Revenue Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Revenue Overview</div>
+            <select id="chart-period" onchange="renderChart()" style="background:#0a0a14;border:1px solid rgba(var(--purple-rgb),0.2);color:var(--purple-glow);border-radius:6px;padding:4px 8px;font-size:0.78rem;cursor:pointer;">
+              <option value="7">Last 7 Days</option>
+              <option value="14">Last 14 Days</option>
+              <option value="30" selected>Last 30 Days</option>
+            </select>
+          </div>
+          <canvas id="revenueChart" height="180"></canvas>
+        </div>
+
+        <!-- System Status -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">System Status</div>
+            <span style="font-size:0.72rem;color:#4ade80;background:rgba(34,197,94,0.1);padding:3px 8px;border-radius:6px;">All Operational</span>
+          </div>
+          <div class="sys-item"><span><span class="status-dot dot-green"></span>Web Server</span><span class="badge badge-success">Online</span></div>
+          <div class="sys-item"><span><span class="status-dot dot-green"></span>Database</span><span class="badge badge-success">Online</span></div>
+          <div class="sys-item"><span><span class="status-dot" id="pg-dot" style="background:#4ade80;"></span>Payment Gateway</span><span class="badge badge-success" id="pg-status">Online</span></div>
+          <div class="sys-item"><span><span class="status-dot dot-green"></span>Storage</span><span class="badge badge-success">Online</span></div>
+          <div class="sys-item"><span><span class="status-dot dot-green"></span>Security Shield</span><span class="badge badge-success">Active</span></div>
+
+          <div class="card-header" style="margin-top:20px;margin-bottom:12px;">
+            <div class="card-title" style="font-size:0.9rem;">Server Resources</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">CPU</div>
+            <div class="res-bar-wrap"><div class="res-bar" id="cpu-bar" style="width:0%;background:var(--purple-glow);"></div></div>
+            <div class="res-pct" id="cpu-pct">-</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">RAM</div>
+            <div class="res-bar-wrap"><div class="res-bar" id="ram-bar" style="width:0%;background:var(--cyan);"></div></div>
+            <div class="res-pct" id="ram-pct">-</div>
+          </div>
+          <div class="res-item">
+            <div class="res-label">Disk</div>
+            <div class="res-bar-wrap"><div class="res-bar" id="disk-bar" style="width:0%;background:var(--gold);"></div></div>
+            <div class="res-pct" id="disk-pct">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT TRANSACTIONS + ACTIVITY FEED -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Transactions</div>
+            <button class="card-action" onclick="showTab('orders',document.querySelector('[onclick*=orders]'))">View All</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr>
+                <th>Order ID</th><th>Game</th><th>Diamond</th><th>Total</th><th>Status</th><th>Time</th>
+              </tr></thead>
+              <tbody id="recent-orders-tbody">
+                {% for o in orders[:8] %}
+                <tr>
+                  <td style="font-family:monospace;color:var(--purple-glow);">#{{ o.id }}</td>
+                  <td>{{ o.game }}</td>
+                  <td style="color:var(--cyan);">{{ o.diamond }}</td>
+                  <td>{{ o.price }}</td>
+                  <td><span class="badge badge-{{ o.status }}">{{ o.status|capitalize }}</span></td>
+                  <td style="color:rgba(255,255,255,0.35);font-size:0.75rem;">{{ o.created_at[:16] if o.created_at else '-' }}</td>
+                </tr>
+                {% endfor %}
+                {% if not orders %}<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.3);padding:24px;">No orders yet.</td></tr>{% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Activities</div>
+            <button class="card-action" onclick="showTab('actlog',document.querySelector('[onclick*=actlog]'))">View All</button>
+          </div>
+          <div id="recent-activity-feed">
+            {% for log in act_logs[:8] %}
+            <div class="activity-item">
+              <div class="activity-dot" style="background:{% if log.status_code == 403 or log.status_code == 429 %}#ef4444{% elif log.method == 'POST' %}var(--gold){% else %}var(--purple-glow){% endif %};"></div>
+              <div>
+                <div class="activity-text">{{ log.action }}</div>
+                <div class="activity-time">{{ log.ip }} &middot; {{ log.created_at[:16] if log.created_at else '-' }}</div>
+              </div>
+            </div>
+            {% endfor %}
+            {% if not act_logs %}<div style="text-align:center;color:rgba(255,255,255,0.3);padding:24px;font-size:0.85rem;">No activity yet.</div>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ORDERS TAB ===== -->
+    <div class="tab-content" id="tab-orders">
+      <!-- Waiting Verification Alert -->
+      {% set wv_orders = orders | selectattr('status','in',['waiting_verification','unverified_claim']) | list %}
+      {% if wv_orders %}
+      <div style="background:rgba(var(--gold-rgb),0.1);border:1px solid rgba(var(--gold-rgb),0.3);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span style="color:var(--gold);font-size:1.2rem;">&#9888;</span>
+        <span style="color:var(--gold);font-weight:700;font-family:'Rajdhani',sans-serif;">{{ wv_orders|length }} order(s) waiting for your verification!</span>
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Orders ({{ orders|length }})</div>
+          <input type="text" class="form-input" placeholder="Search order ID / game..." oninput="filterTable(this,'orders-tbl')" style="width:220px;">
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl" id="orders-tbl">
+            <thead><tr><th>ID</th><th>Game</th><th>User ID</th><th>Diamond</th><th>Price</th><th>Payment</th><th>Status</th><th>Proof</th><th>Time</th><th>Actions</th></tr></thead>
+            <tbody id="all-orders-tbody">
+              {% for o in orders %}
+              <tr style="{% if o.status=='waiting_verification' %}background:rgba(var(--gold-rgb),0.04);{% elif o.status=='unverified_claim' %}background:rgba(249,115,22,0.06);{% endif %}">
+                <td style="font-family:monospace;color:var(--purple-glow);">#{{ o.id }}</td>
+                <td>{{ o.game }}</td>
+                <td style="font-family:monospace;font-size:0.78rem;">{{ o.user_id }}{% if o.server_id %}/{{ o.server_id }}{% endif %}</td>
+                <td style="color:var(--cyan);">{{ o.diamond }}</td>
+                <td>{{ o.price }}</td>
+                <td><span class="badge badge-info">{{ o.payment }}</span></td>
+                <td>
+                  <span class="badge {% if o.status=='completed' %}badge-success{% elif o.status=='cancelled' %}badge-failed{% elif o.status=='processing' %}badge-info{% elif o.status=='unverified_claim' %}badge-claim{% else %}badge-pending{% endif %}">
+                    {{ o.status_label }}
+                  </span>
+                </td>
+                <td>
+                  {% if o.payment_proof %}
+                    <a href="{{ url_for('uploaded_file', filename=o.payment_proof) }}" target="_blank" style="color:var(--purple-glow);font-size:0.78rem;text-decoration:none;">
+                      View Proof
+                    </a>
+                  {% else %}
+                    <span style="color:rgba(255,255,255,0.2);font-size:0.75rem;">-</span>
+                  {% endif %}
+                </td>
+                <td style="font-size:0.75rem;color:rgba(255,255,255,0.35);">{{ o.created_at[:16] if o.created_at else '-' }}</td>
+                <td style="display:flex;gap:4px;flex-wrap:wrap;min-width:200px;">
+                  <!-- View Detail button -->
+                  <button type="button"
+                    style="background:linear-gradient(135deg,rgba(6,182,212,0.2),rgba(168,85,247,0.2));border:1px solid rgba(6,182,212,0.4);color:#67e8f9;cursor:pointer;border-radius:8px;padding:5px 12px;font-size:0.75rem;font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:0.3px;transition:all 0.2s;"
+                    onmouseover="this.style.background='linear-gradient(135deg,rgba(6,182,212,0.35),rgba(168,85,247,0.35))';this.style.borderColor='rgba(6,182,212,0.7)'"
+                    onmouseout="this.style.background='linear-gradient(135deg,rgba(6,182,212,0.2),rgba(168,85,247,0.2))';this.style.borderColor='rgba(6,182,212,0.4)'"
+                    onclick="showOrderDetail({
+                      id:'{{ o.id }}',
+                      game:'{{ o.game | e }}',
+                      user_id:'{{ o.user_id | e }}',
+                      server_id:'{{ o.server_id or '' }}',
+                      diamond:'{{ o.diamond | e }}',
+                      price:'{{ o.price | e }}',
+                      payment:'{{ o.payment | e }}',
+                      status:'{{ o.status_label | e }}',
+                      created_at:'{{ o.created_at[:16] if o.created_at else '-' }}',
+                      proof:'{{ url_for('uploaded_file', filename=o.payment_proof) if o.payment_proof else '' }}'
+                    })">
+                    View Detail
+                  </button>
+                  <!-- Approve button — only for waiting_verification -->
+                  {% if o.status in ('waiting_verification','unverified_claim') %}
+                  <form method="POST" action="{{ url_for('admin_approve_order', order_id=o.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-success" style="font-weight:700;padding:5px 12px;"
+                      onclick="return approveWithProofCheck('{{ o.id }}', {{ 'true' if o.payment_proof else 'false' }})">
+                      Approve
+                    </button>
+                  </form>
+                  {% endif %}
+                  <!-- Cancel button -->
+                  {% if o.status not in ('completed','cancelled') %}
+                  <form method="POST" action="{{ url_for('admin_cancel_order', order_id=o.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-danger"
+                      onclick="return confirm('Cancel order #{{ o.id }}?')">
+                      Cancel
+                    </button>
+                  </form>
+                  {% endif %}
+                  <!-- Manual status update -->
+                  <form method="POST" action="{{ url_for('admin_update_order', order_id=o.id) }}" style="display:flex;gap:4px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="status" class="form-input" style="width:120px;padding:3px 6px;font-size:0.72rem;">
+                      {% for sk, sv in status_labels.items() %}
+                      <option value="{{ sk }}" {% if o.status==sk %}selected{% endif %}>{{ sv }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-primary btn-sm">Set</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not orders %}<tr><td colspan="10" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No orders yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RATINGS TAB ===== -->
+    <div class="tab-content" id="tab-ratings">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Ratings & Reviews ({{ ratings|length }})</div></div>
+        {% for r in ratings %}
+        <div style="background:rgba(var(--purple-rgb),0.05);border:1px solid rgba(var(--purple-rgb),0.12);border-radius:12px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-weight:700;color:#fff;">{{ r.name }}</span>
+            <span style="color:rgba(255,255,255,0.35);font-size:0.75rem;">{{ r.created_at[:16] if r.created_at else '-' }}</span>
+          </div>
+          <div style="color:var(--gold);margin-bottom:6px;">{{ '★' * r.bintang }}{{ '☆' * (5 - r.bintang) }}</div>
+          <p style="color:rgba(255,255,255,0.65);font-size:0.88rem;margin-bottom:10px;">{{ r.isi }}</p>
+          {% if r.admin_reply %}
+          <div style="background:rgba(var(--purple-rgb),0.1);border-left:3px solid var(--purple-glow);padding:10px 12px;border-radius:0 8px 8px 0;font-size:0.85rem;color:#c4b5fd;margin-bottom:10px;">
+            <div style="font-size:0.7rem;color:var(--purple-glow);font-weight:700;margin-bottom:4px;">ADMIN REPLY</div>
+            {{ r.admin_reply }}
+          </div>
+          {% endif %}
+          <form method="POST" action="{{ url_for('admin_reply_rating', rating_id=r.id) }}" style="display:flex;gap:8px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="reply" class="form-input" placeholder="Write a reply..." value="{{ r.admin_reply or '' }}">
+            <button type="submit" class="btn-primary btn-sm" style="white-space:nowrap;">Reply</button>
+          </form>
+        </div>
+        {% endfor %}
+        {% if not ratings %}<div style="text-align:center;color:rgba(255,255,255,0.3);padding:40px;">No ratings yet.</div>{% endif %}
+      </div>
+    </div>
+
+    <!-- ===== REPORTS TAB ===== -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Bug Reports ({{ reports|length }})</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Kategori</th><th>Deskripsi</th><th>Time</th></tr></thead>
+            <tbody>
+              {% for r in reports %}
+              <tr>
+                <td style="color:var(--purple-glow);">#{{ r.id }}</td>
+                <td>{{ r.name }}</td>
+                <td style="font-size:0.78rem;color:rgba(255,255,255,0.5);">{{ r.email or '-' }}</td>
+                <td><span class="badge badge-info">{{ r.kategori }}</span></td>
+                <td style="max-width:300px;color:rgba(255,255,255,0.6);">{{ r.deskripsi }}</td>
+                <td style="font-size:0.75rem;color:rgba(255,255,255,0.35);">{{ r.created_at[:16] if r.created_at else '-' }}</td>
+              </tr>
+              {% endfor %}
+              {% if not reports %}<tr><td colspan="6" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No reports yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KRITIK TAB ===== -->
+    <div class="tab-content" id="tab-kritik">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Kritik ({{ kritiks|length }})</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Content</th><th>Time</th></tr></thead>
+            <tbody>
+              {% for k in kritiks %}
+              <tr>
+                <td style="color:var(--purple-glow);">#{{ k.id }}</td>
+                <td>{{ k.name }}</td>
+                <td style="font-size:0.78rem;color:rgba(255,255,255,0.5);">{{ k.email or '-' }}</td>
+                <td style="max-width:350px;color:rgba(255,255,255,0.6);">{{ k.isi }}</td>
+                <td style="font-size:0.75rem;color:rgba(255,255,255,0.35);">{{ k.created_at[:16] if k.created_at else '-' }}</td>
+              </tr>
+              {% endfor %}
+              {% if not kritiks %}<tr><td colspan="5" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No critiques yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SARAN TAB ===== -->
+    <div class="tab-content" id="tab-saran">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Saran ({{ sarans|length }})</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Content</th><th>Time</th></tr></thead>
+            <tbody>
+              {% for s in sarans %}
+              <tr>
+                <td style="color:var(--purple-glow);">#{{ s.id }}</td>
+                <td>{{ s.name }}</td>
+                <td style="font-size:0.78rem;color:rgba(255,255,255,0.5);">{{ s.email or '-' }}</td>
+                <td style="max-width:350px;color:rgba(255,255,255,0.6);">{{ s.isi }}</td>
+                <td style="font-size:0.75rem;color:rgba(255,255,255,0.35);">{{ s.created_at[:16] if s.created_at else '-' }}</td>
+              </tr>
+              {% endfor %}
+              {% if not sarans %}<tr><td colspan="5" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No suggestions yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACTIVITY LOG TAB ===== -->
+    <div class="tab-content" id="tab-actlog">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Activity Logs <span style="font-size:0.78rem;color:rgba(255,255,255,0.35);font-weight:400;">(latest 500)</span></div>
+          <input type="text" class="form-input" placeholder="Filter IP / path / action..." oninput="filterTable(this,'actlog-tbl')" style="width:220px;">
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl" id="actlog-tbl">
+            <thead><tr><th>Time</th><th>IP</th><th>Method</th><th>Path</th><th>Actions</th><th>Detail</th><th>Status</th></tr></thead>
+            <tbody id="actlog-tbody">
+              {% for log in act_logs %}
+              <tr class="{% if log.status_code == 403 or log.status_code == 429 or (log.detail and 'tanpa izin' in log.detail) %}log-suspicious{% endif %}">
+                <td style="white-space:nowrap;color:rgba(255,255,255,0.4);">{{ log.created_at[:16] if log.created_at else '-' }}</td>
+                <td style="font-family:monospace;color:var(--cyan);">{{ log.ip }}</td>
+                <td><span class="badge {% if log.method == 'POST' %}badge-pending{% else %}badge-info{% endif %}">{{ log.method }}</span></td>
+                <td style="font-family:monospace;font-size:0.78rem;color:rgba(255,255,255,0.5);">{{ log.path }}</td>
+                <td style="color:rgba(255,255,255,0.7);">{{ log.action }}</td>
+                <td style="color:{% if log.detail and ('ditolak' in log.detail or 'tanpa izin' in log.detail or 'diblokir' in log.detail) %}#ef4444{% else %}rgba(255,255,255,0.35){% endif %};font-size:0.78rem;">{{ log.detail or '-' }}</td>
+                <td><span class="badge {% if log.status_code == 200 %}badge-success{% elif log.status_code == 302 %}badge-info{% elif log.status_code >= 400 %}badge-failed{% else %}badge-pending{% endif %}">{{ log.status_code }}</span></td>
+              </tr>
+              {% endfor %}
+              {% if not act_logs %}<tr><td colspan="7" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No logs yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VOUCHERS TAB (Owner only) ===== -->
+    <div class="tab-content" id="tab-vouchers">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="card-title">Create Voucher</div></div>
+        <form method="POST" action="{{ url_for('admin_voucher_create') }}" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Code</label>
+            <input type="text" name="code" class="form-input" placeholder="e.g. SAVE20" style="text-transform:uppercase;" required>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Discount Type</label>
+            <select name="discount_type" class="form-input">
+              <option value="percent">Percent (%)</option>
+              <option value="fixed">Fixed (Rp)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Value</label>
+            <input type="number" name="discount_value" class="form-input" placeholder="e.g. 20" min="1" required>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Max Uses <span style="opacity:0.6;">(optional)</span></label>
+            <input type="number" name="max_uses" class="form-input" placeholder="Unlimited" min="1">
+          </div>
+          <div style="grid-column:1/-1;">
+            <button type="submit" class="btn-primary">Create Voucher</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">All Vouchers ({{ vouchers|length }})</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Code</th><th>Discount</th><th>Used</th><th>Status</th><th>Created By</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for v in vouchers %}
+              <tr>
+                <td style="font-family:monospace;color:var(--purple-glow);font-weight:700;">{{ v.code }}</td>
+                <td>{% if v.discount_type=='percent' %}{{ v.discount_value }}%{% else %}Rp {{ '{:,.0f}'.format(v.discount_value).replace(',', '.') }}{% endif %}</td>
+                <td>{{ v.used_count }}{% if v.max_uses %} / {{ v.max_uses }}{% else %} / &infin;{% endif %}</td>
+                <td><span class="badge {% if v.is_active %}badge-success{% else %}badge-failed{% endif %}">{{ 'Active' if v.is_active else 'Inactive' }}</span></td>
+                <td style="font-size:0.78rem;color:rgba(255,255,255,0.5);">{{ v.created_by or '-' }}</td>
+                <td style="font-size:0.75rem;color:rgba(255,255,255,0.35);">{{ v.created_at[:16] if v.created_at else '-' }}</td>
+                <td style="display:flex;gap:4px;">
+                  <form method="POST" action="{{ url_for('admin_voucher_toggle', voucher_id=v.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-sm {% if v.is_active %}btn-danger{% else %}btn-success{% endif %}">{{ 'Disable' if v.is_active else 'Enable' }}</button>
+                  </form>
+                  <form method="POST" action="{{ url_for('admin_voucher_delete', voucher_id=v.id) }}" onsubmit="return confirm('Delete voucher {{ v.code }}?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not vouchers %}<tr><td colspan="7" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No vouchers created yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STAFF ACCOUNTS TAB (Owner only) ===== -->
+    <div class="tab-content" id="tab-staffmgmt">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="card-title">Create Staff Account</div></div>
+        <form method="POST" action="{{ url_for('admin_staff_create') }}" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Username</label>
+            <input type="text" name="username" class="form-input" placeholder="staff_username" required>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Password</label>
+            <input type="password" name="password" class="form-input" placeholder="Min. 8 characters" minlength="8" required>
+          </div>
+          <button type="submit" class="btn-primary">Create Staff</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">All Admin Accounts ({{ admin_users|length }})</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for u in admin_users %}
+              <tr>
+                <td style="font-family:monospace;color:#fff;">{{ u.username }}</td>
+                <td><span class="badge {% if u.role=='owner' %}badge-info{% else %}badge-pending{% endif %}">{{ u.role|capitalize }}</span></td>
+                <td style="font-size:0.75rem;color:rgba(255,255,255,0.35);">{{ u.created_at[:16] if u.created_at else '-' }}</td>
+                <td>
+                  {% if u.role != 'owner' %}
+                  <form method="POST" action="{{ url_for('admin_staff_delete', staff_id=u.id) }}" onsubmit="return confirm('Delete staff account {{ u.username }}?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-danger btn-sm">Delete</button>
+                  </form>
+                  {% else %}
+                  <span style="color:rgba(255,255,255,0.2);font-size:0.78rem;">-</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN LOG TAB ===== -->
+    <div class="tab-content" id="tab-adminlog">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Admin Logs <span style="font-size:0.78rem;color:rgba(255,255,255,0.35);font-weight:400;">(latest 200)</span></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Time</th><th>IP</th><th>Actions</th><th>Detail</th></tr></thead>
+            <tbody id="adminlog-tbody">
+              {% for log in admin_logs %}
+              <tr style="{% if 'GAGAL' in log.action %}background:rgba(239,68,68,0.04);{% elif 'Berhasil' in log.action %}background:rgba(34,197,94,0.03);{% endif %}">
+                <td style="white-space:nowrap;color:rgba(255,255,255,0.4);">{{ log.created_at[:16] if log.created_at else '-' }}</td>
+                <td style="font-family:monospace;color:var(--cyan);">{{ log.ip }}</td>
+                <td style="font-weight:700;color:{% if 'GAGAL' in log.action %}#ef4444{% elif 'Berhasil' in log.action %}#4ade80{% else %}var(--purple-glow){% endif %};">{{ log.action }}</td>
+                <td style="color:rgba(255,255,255,0.55);font-size:0.85rem;">{{ log.detail or '-' }}</td>
+              </tr>
+              {% endfor %}
+              {% if not admin_logs %}<tr><td colspan="4" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No admin logs yet.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ===== LIVE CLOCK =====
+function updateClock(){
+  const now=new Date();
+  document.getElementById('live-clock').textContent=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock,1000); updateClock();
+
+// ===== TAB SWITCHING =====
+function showTab(name,el){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const tab=document.getElementById('tab-'+name);
+  if(tab) tab.classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',orders:'Orders',ratings:'Ratings',reports:'Reports',kritik:'Kritik',saran:'Saran',actlog:'Activity Logs',adminlog:'Admin Logs',vouchers:'Vouchers',staffmgmt:'Staff Accounts'};
+  document.getElementById('page-title').textContent=titles[name]||name;
+  document.getElementById('page-sub').textContent=name==='dashboard'?'Welcome back, Admin':'TrustTop Up Admin Panel';
+  if(name==='dashboard') renderChart();
+}
+
+// ===== TABLE FILTER =====
+function filterTable(input,tableId){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll('#'+tableId+' tbody tr').forEach(row=>{
+    row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+// ===== CHART DATA (updated by API) =====
+let allOrders = {{ orders | tojson }};
+
+function renderChart(){
+  const days=parseInt(document.getElementById('chart-period').value)||30;
+  const canvas=document.getElementById('revenueChart');
+  if(!canvas) return;
+  if(canvas.offsetWidth === 0){ setTimeout(renderChart, 100); return; }
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth; canvas.height=180;
+
+  const map={};
+  const now=new Date();
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10); map[key]=0;
+  }
+  allOrders.forEach(o=>{
+    if(o.status==='completed'&&o.created_at){
+      const k=o.created_at.slice(0,10);
+      if(map[k]!==undefined) map[k]+=(o.price_int||0);
+    }
+  });
+  const labels=Object.keys(map);
+  const values=Object.values(map);
+  const maxVal=Math.max(...values,1);
+  const W=canvas.width, H=canvas.height;
+  const padL=50,padR=10,padT=10,padB=30;
+  const cW=W-padL-padR, cH=H-padT-padB;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=padT+cH-(cH/4*i);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.font='10px Nunito'; ctx.textAlign='right';
+    const val=Math.round(maxVal/4*i);
+    ctx.fillText(val>=1000000?'Rp'+(val/1000000).toFixed(1)+'jt':val>=1000?'Rp'+(val/1000).toFixed(0)+'k':'Rp'+val,padL-4,y+3);
+  }
+  const pts=values.map((v,i)=>({x:padL+(i/(labels.length-1||1))*cW,y:padT+cH-(v/maxVal)*cH}));
+  const grad=ctx.createLinearGradient(0,padT,0,padT+cH);
+  grad.addColorStop(0,'rgba(var(--purple-rgb),0.3)'); grad.addColorStop(1,'rgba(var(--purple-rgb),0)');
+  ctx.beginPath(); ctx.moveTo(pts[0].x,padT+cH);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.lineTo(pts[pts.length-1].x,padT+cH); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle='var(--purple-glow)'; ctx.lineWidth=2;
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+  const step=Math.max(1,Math.floor(labels.length/6));
+  labels.forEach((l,i)=>{
+    if(i%step===0){ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='9px Nunito';ctx.textAlign='center';ctx.fillText(l.slice(5),pts[i].x,H-6);}
+    ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,3,0,Math.PI*2);ctx.fillStyle='var(--purple-glow)';ctx.fill();
+  });
+}
+
+// ===== UPDATE RESOURCES BAR =====
+function updateResBar(id,pct){
+  const bar=document.getElementById(id+'-bar');
+  const txt=document.getElementById(id+'-pct');
+  if(bar) bar.style.width=pct+'%';
+  if(txt) txt.textContent=pct+'%';
+}
+
+// ===== STATUS BADGE =====
+function statusBadge(s){
+  const map={success:'badge-success',pending:'badge-pending',failed:'badge-failed'};
+  return `<span class="badge ${map[s]||'badge-info'}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+}
+
+// ===== UPDATE STAT CARDS =====
+function drawSparkline(canvasId, data, color){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas||!data||data.length<2) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const max=Math.max(...data,1), min=Math.min(...data,0), range=max-min||1;
+  const pts=data.map((v,i)=>({x:(i/(data.length-1))*W, y:H-((v-min)/range)*(H-4)-2}));
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,color+'55'); grad.addColorStop(1,color+'00');
+  ctx.beginPath(); ctx.moveTo(pts[0].x,H);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.lineTo(pts[pts.length-1].x,H); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5;
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.stroke();
+}
+
+function updateStats(stats, sparklines){
+  const el=id=>document.getElementById(id);
+  if(el('stat-total')) el('stat-total').textContent=stats.total_orders;
+  if(el('stat-revenue')) el('stat-revenue').textContent=stats.revenue;
+  if(el('stat-users')) el('stat-users').textContent=stats.total_users||0;
+  if(el('stat-pending')) el('stat-pending').textContent=stats.pending;
+  if(el('stat-rate')) el('stat-rate').textContent=stats.success_rate+'%';
+  if(el('stat-success-sub')) el('stat-success-sub').textContent=stats.success+' successful';
+
+  function setChange(elId, val){
+    const e=document.getElementById(elId);
+    if(!e||val===undefined) return;
+    const isPos=!String(val).startsWith('-');
+    e.textContent=val+'% vs last month';
+    e.style.color=isPos?'#4ade80':'#ef4444';
+  }
+  setChange('stat-orders-change',  stats.orders_change);
+  setChange('stat-revenue-change', stats.revenue_change);
+  setChange('stat-users-change',   stats.users_change);
+  setChange('stat-pending-change', stats.pending_change);
+
+  if(sparklines){
+    drawSparkline('spark-orders',  sparklines.orders,  'var(--purple-glow)');
+    drawSparkline('spark-revenue', sparklines.revenue, '#4ade80');
+    drawSparkline('spark-users',   sparklines.users,   'var(--cyan)');
+    drawSparkline('spark-pending', sparklines.pending, 'var(--gold)');
+  }
+
+  const badge=document.querySelector('[onclick*="orders"] .nav-badge');
+  if(badge){ if(stats.pending>0){badge.textContent=stats.pending;badge.style.display='inline';}else{badge.style.display='none';} }
+}
+
+// ===== UPDATE RECENT TRANSACTIONS =====
+function updateRecentOrders(orders){
+  const tbody=document.getElementById('recent-orders-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=orders.slice(0,8).map(o=>`
+    <tr>
+      <td style="font-family:monospace;color:var(--purple-glow);">#${o.id}</td>
+      <td>${o.game}</td>
+      <td style="color:var(--cyan);">${o.diamond}</td>
+      <td>${o.price}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td style="color:rgba(255,255,255,0.35);font-size:0.75rem;">${(o.created_at||'').slice(0,16)}</td>
+    </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.3);padding:24px;">No orders yet.</td></tr>';
+}
+
+// ===== UPDATE RECENT ACTIVITY FEED =====
+function updateActivityFeed(logs){
+  const feed=document.getElementById('recent-activity-feed');
+  if(!feed) return;
+  feed.innerHTML=logs.slice(0,8).map(log=>`
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${log.status_code>=400?'#ef4444':log.method==='POST'?'var(--gold)':'var(--purple-glow)'};"></div>
+      <div>
+        <div class="activity-text">${log.action}</div>
+        <div class="activity-time">${log.ip} &middot; ${(log.created_at||'').slice(0,16)}</div>
+      </div>
+    </div>`).join('')||'<div style="text-align:center;color:rgba(255,255,255,0.3);padding:24px;font-size:0.85rem;">No activity yet.</div>';
+}
+
+// ===== UPDATE ALL ORDERS TABLE =====
+function updateOrdersTable(orders){
+  allOrders=orders;
+  const tbody=document.getElementById('all-orders-tbody');
+  if(!tbody) return;
+  // Don't auto-update orders table to preserve approve buttons - just update stats
+}
+
+// ===== UPDATE ACTIVITY LOGS TABLE =====
+function updateActLogs(logs){
+  const tbody=document.getElementById('actlog-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=logs.map(log=>`
+    <tr class="${log.status_code>=400||( log.detail&&log.detail.includes('tanpa izin'))?'log-suspicious':''}">
+      <td style="white-space:nowrap;color:rgba(255,255,255,0.4);">${(log.created_at||'').slice(0,16)}</td>
+      <td style="font-family:monospace;color:var(--cyan);">${log.ip}</td>
+      <td><span class="badge ${log.method==='POST'?'badge-pending':'badge-info'}">${log.method}</span></td>
+      <td style="font-family:monospace;font-size:0.78rem;color:rgba(255,255,255,0.5);">${log.path}</td>
+      <td style="color:rgba(255,255,255,0.7);">${log.action}</td>
+      <td style="color:${log.detail&&(log.detail.includes('ditolak')||log.detail.includes('tanpa izin')||log.detail.includes('diblokir'))?'#ef4444':'rgba(255,255,255,0.35)'};font-size:0.78rem;">${log.detail||'-'}</td>
+      <td><span class="badge ${log.status_code===200?'badge-success':log.status_code===302?'badge-info':log.status_code>=400?'badge-failed':'badge-pending'}">${log.status_code}</span></td>
+    </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No logs yet.</td></tr>';
+
+  // Update suspicious badge
+  const sus=logs.filter(l=>l.status_code>=400).length;
+  const badge=document.getElementById('suspicious-count');
+  if(badge){badge.textContent=sus;badge.style.display=sus>0?'inline':'none';}
+}
+
+// ===== UPDATE ADMIN LOGS TABLE =====
+function updateAdminLogs(logs){
+  const tbody=document.getElementById('adminlog-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=logs.map(log=>`
+    <tr style="${log.action.includes('GAGAL')?'background:rgba(239,68,68,0.04);':log.action.includes('Berhasil')?'background:rgba(34,197,94,0.03);':''}">
+      <td style="white-space:nowrap;color:rgba(255,255,255,0.4);">${(log.created_at||'').slice(0,16)}</td>
+      <td style="font-family:monospace;color:var(--cyan);">${log.ip}</td>
+      <td style="font-weight:700;color:${log.action.includes('GAGAL')?'#ef4444':log.action.includes('Berhasil')?'#4ade80':'var(--purple-glow)'};">${log.action}</td>
+      <td style="color:rgba(255,255,255,0.55);font-size:0.85rem;">${log.detail||'-'}</td>
+    </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No admin logs yet.</td></tr>';
+}
+
+// ===== MAIN POLLING FUNCTION =====
+let lastUpdated=null;
+function pollData(){
+  fetch('/api/admin/stats')
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.stats) updateStats(data.stats, data.sparklines||null);
+      if(data.resources){
+        updateResBar('cpu', data.resources.cpu||0);
+        updateResBar('ram', data.resources.ram||0);
+        updateResBar('disk', data.resources.disk||0);
+      }
+      if(data.recent_orders) updateRecentOrders(data.recent_orders);
+      if(data.recent_activity) updateActivityFeed(data.recent_activity);
+      if(data.all_orders) updateOrdersTable(data.all_orders);
+      if(data.all_logs) updateActLogs(data.all_logs);
+      if(data.admin_logs) updateAdminLogs(data.admin_logs);
+      renderChart();
+      const now=new Date();
+      const el=document.getElementById('last-updated');
+      if(el) el.textContent='Last updated: '+now.toLocaleTimeString('id-ID');
+    })
+    .catch(err=>console.error('Poll error:',err));
+}
+
+// Langsung poll saat halaman load
+document.addEventListener('DOMContentLoaded', function(){
+  pollData();
+  setInterval(pollData, 10000);
+});
+
+window.addEventListener('resize', renderChart);
+</script>
+
+<!-- Order Detail Modal -->
+<div id="order-detail-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);overflow-y:auto;">
+  <div style="max-width:480px;margin:40px auto;background:#1a1a2e;border:1px solid rgba(168,85,247,0.3);border-radius:16px;padding:28px;position:relative;">
+    <button onclick="closeOrderDetail()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;line-height:1;">&#x2715;</button>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--purple-glow);margin-bottom:18px;">Order Detail</div>
+
+    <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);width:40%;">Order ID</td><td id="d-id" style="font-family:monospace;color:var(--purple-glow);font-weight:700;"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Game</td><td id="d-game"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">User ID</td><td id="d-uid" style="font-family:monospace;font-size:0.8rem;"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Server ID</td><td id="d-sid" style="font-family:monospace;font-size:0.8rem;"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Package</td><td id="d-diamond" style="color:var(--cyan);"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Total</td><td id="d-price" style="color:var(--gold);font-weight:700;"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Payment</td><td id="d-payment"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Status</td><td id="d-status"></td></tr>
+      <tr><td style="padding:6px 0;color:rgba(255,255,255,0.45);">Time</td><td id="d-time" style="font-size:0.78rem;color:rgba(255,255,255,0.55);"></td></tr>
+    </table>
+
+    <div style="margin-top:20px;">
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Payment Proof</div>
+      <div id="d-proof-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showOrderDetail(o) {
+  document.getElementById('d-id').textContent = '#' + o.id;
+  document.getElementById('d-game').textContent = o.game;
+  document.getElementById('d-uid').textContent = o.user_id;
+  document.getElementById('d-sid').textContent = o.server_id || '-';
+  document.getElementById('d-diamond').textContent = o.diamond;
+  document.getElementById('d-price').textContent = o.price;
+  document.getElementById('d-payment').textContent = o.payment;
+  document.getElementById('d-status').textContent = o.status;
+  document.getElementById('d-time').textContent = o.created_at;
+
+  const proofWrap = document.getElementById('d-proof-wrap');
+  if (o.proof) {
+    proofWrap.innerHTML = `
+      <a href="${o.proof}" target="_blank">
+        <img src="${o.proof}" alt="Payment Proof"
+          style="width:100%;max-height:320px;object-fit:contain;border-radius:10px;border:1px solid rgba(168,85,247,0.25);cursor:pointer;" />
+      </a>
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:6px;text-align:center;">Click image to open full size</div>`;
+  } else {
+    proofWrap.innerHTML = `
+      <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:16px;text-align:center;">
+        <div style="color:#ef4444;font-weight:700;margin-bottom:4px;">No proof uploaded</div>
+        <div style="color:rgba(255,255,255,0.45);font-size:0.8rem;">Customer has not submitted payment proof.<br>Do NOT approve without verifying payment first.</div>
+      </div>`;
+  }
+
+  document.getElementById('order-detail-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOrderDetail() {
+  document.getElementById('order-detail-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function approveWithProofCheck(orderId, hasProof) {
+  if (!hasProof) {
+    return confirm(
+      'WARNING: This order has NO payment proof uploaded.\n\n' +
+      'Approving without proof risks processing a fake or unpaid order.\n\n' +
+      'Are you sure you want to approve order #' + orderId + '?'
+    );
+  }
+  return confirm('Approve order #' + orderId + ' and send to VIP-Reseller?');
+}
+
+document.getElementById('order-detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeOrderDetail();
+});
+</script>
+</body>
+</html>

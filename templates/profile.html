@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+  .settings-close-btn {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 200;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none;
+  }
+  .settings-close-btn:hover { background: rgba(0,0,0,0.9); transform: scale(1.05); }
+  .settings-close-btn svg { width: 16px; height: 16px; }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .back-link:hover { color: #fff; }
+  .user-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(var(--purple-rgb),0.35);
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .user-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--purple-glow);
+  }
+  .user-card .name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .user-card .email {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px;
+  }
+  .danger-section {
+    background: rgba(239,68,68,0.05);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .settings-section {
+    background: var(--card-bg);
+    border: 1px solid rgba(var(--purple-rgb),0.2);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .section-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .danger-title {
+    color: #f87171;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .danger-desc {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .danger-input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    outline: none;
+  }
+  .btn-danger {
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.45);
+    color: #f87171;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+  }
+  .flash {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+  }
+  .flash-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: #4ade80; }
+  .flash-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  <a href="{{ url_for('settings') }}" class="settings-close-btn" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+      <line x1="5" y1="5" x2="19" y2="19"/>
+      <line x1="19" y1="5" x2="5" y2="19"/>
+    </svg>
+  </a>
+  <nav>
+    <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <div class="settings-wrap">
+    <a href="{{ url_for('settings') }}" class="back-link">&#8249; {{ t('profile_back') }}</a>
+    <div class="section-title" style="margin-bottom:24px;">{{ t('profile_title') }}</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {% if cat == 'error' %}flash-error{% else %}flash-success{% endif %}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- Profile -->
+    <div class="user-card">
+      {% if user_avatar %}
+      <img src="{{ user_avatar }}" alt="avatar">
+      {% else %}
+      <div style="width:60px;height:60px;border-radius:50%;background:rgba(var(--purple-glow-rgb),0.2);border:2px solid var(--purple-glow);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--purple-glow);">{{ user_name[0]|upper if user_name else 'U' }}</div>
+      {% endif %}
+      <div>
+        <div class="name">{{ user_name }}</div>
+        <div class="email">{{ user_email }}</div>
+      </div>
+    </div>
+
+    <!-- Edit Profile -->
+    <div class="settings-section">
+      <div class="section-label">{{ t('profile_edit_section') }}</div>
+      <form method="POST" action="{{ url_for('settings_profile_update') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="profile-name" style="display:block;color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:8px;">{{ t('profile_name_label') }}</label>
+        <input type="text" id="profile-name" name="name" value="{{ user_name }}" required maxlength="50" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(var(--purple-rgb),0.3);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Nunito', sans-serif;font-size:0.9rem;outline:none;margin-bottom:14px;">
+        <button type="submit" class="btn-danger" style="background:rgba(var(--purple-rgb),0.15);border-color:rgba(var(--purple-rgb),0.45);color:var(--purple-glow);">{{ t('profile_save_btn') }}</button>
+      </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-section">
+      <div class="danger-title">{{ t('settings_delete_account') }}</div>
+      <div class="danger-desc">
+        {{ t('settings_delete_desc') }}
+      </div>
+      <form method="POST" action="{{ url_for('settings_delete_account') }}" onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="confirm" class="danger-input" placeholder="{{ t('settings_delete_placeholder') }}" required>
+        <button type="submit" class="btn-danger">{{ t('settings_delete_btn') }}</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

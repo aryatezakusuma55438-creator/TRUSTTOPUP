@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>403 - Access Denied</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+</head>
+<body>
+<div id="main-site" class="visible">
+  <section class="section" style="padding-top:160px;text-align:center;">
+    <div style="font-size:5rem;margin-bottom:16px;"></div>
+    <div class="section-title" style="justify-content:center;"><span>403</span></div>
+    <div class="section-sub">You don't have access to this page.</div>
+    <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;margin-top:28px;">Back to Home</a>
+  </section>
+</div>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% if pending_order and not (order and order.id == pending_order.id) %}
+<div id="pending-order-card" style="position:fixed;bottom:20px;right:20px;left:20px;max-width:360px;margin:0 0 0 auto;z-index:9000;
+  background:linear-gradient(160deg,#1a1325,#15101f);border:1px solid rgba(250,204,21,0.25);border-radius:16px;
+  padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(250,204,21,0.08);
+  font-family:'Nunito',sans-serif;animation:pendingCardIn 0.4s ease-out;">
+
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <div style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:rgba(250,204,21,0.12);
+      display:flex;align-items:center;justify-content:center;font-size:1.2rem;">&#9201;</div>
+
+    <div style="flex:1;min-width:0;">
+      <div style="color:#fde68a;font-weight:700;font-size:0.92rem;margin-bottom:3px;">Payment Not Completed</div>
+      <div style="color:rgba(255,255,255,0.55);font-size:0.8rem;line-height:1.5;">
+        Order <strong style="color:rgba(255,255,255,0.8);">#{{ pending_order.id }}</strong> &middot; {{ pending_order.game }} &middot; {{ pending_order.price }} is still waiting for payment.
+      </div>
+    </div>
+
+    <button onclick="dismissPendingOrderCard({{ pending_order.id }})" aria-label="Dismiss"
+      style="flex-shrink:0;background:transparent;border:none;color:rgba(255,255,255,0.35);font-size:1rem;
+      cursor:pointer;padding:2px 4px;line-height:1;">&#10005;</button>
+  </div>
+
+  <a href="{{ url_for('continue_order', order_id=pending_order.id, token=pending_order.token) }}" style="text-decoration:none;display:block;margin-top:14px;">
+    <button style="width:100%;background:linear-gradient(135deg,#facc15,#eab308);color:#1c1917;border:none;
+      padding:10px 0;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">Continue Order</button>
+  </a>
+</div>
+
+<style>
+  @keyframes pendingCardIn {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @media (max-width: 480px) {
+    #pending-order-card { left:16px; right:16px; bottom:16px; max-width:none; }
+  }
+</style>
+<script>
+function dismissPendingOrderCard(orderId){
+  const card = document.getElementById('pending-order-card');
+  if (card) { card.style.transition='opacity 0.2s, transform 0.2s'; card.style.opacity='0'; card.style.transform='translateY(16px)'; setTimeout(()=>card.remove(), 200); }
+  fetch(`/api/pending-order/${orderId}/dismiss`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' }
+  }).catch(() => {});
+}
+</script>
+{% endif %}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>About Us - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+.about-wrap { max-width: 720px; margin: 0 auto; padding: 100px 16px 60px; }
+.about-hero { background: linear-gradient(135deg, rgba(var(--purple-rgb),0.15), rgba(var(--cyan-rgb),0.08)); border: 1px solid rgba(var(--purple-rgb),0.3); border-radius: 24px; padding: 36px 28px; margin-bottom: 28px; text-align: center; }
+.about-logo { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg,var(--purple-glow),var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+.about-tagline { color: rgba(255,255,255,0.55); font-size: 0.95rem; line-height: 1.6; }
+.about-card { background: var(--card-bg); border: 1px solid rgba(var(--purple-rgb),0.18); border-radius: 18px; padding: 24px 22px; margin-bottom: 18px; }
+.about-card h2 { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--purple-glow); letter-spacing: 0.5px; margin-bottom: 12px; }
+.about-card p { color: rgba(255,255,255,0.65); font-size: 0.93rem; line-height: 1.75; margin-bottom: 8px; }
+.about-card p:last-child { margin-bottom: 0; }
+.game-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.game-tag { background: rgba(var(--purple-rgb),0.12); border: 1px solid rgba(var(--purple-rgb),0.25); border-radius: 20px; padding: 5px 14px; font-size: 0.82rem; color: #c4b5fd; font-family: 'Nunito', sans-serif; }
+.dev-row { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.dev-card { flex: 1; min-width: 140px; background: rgba(var(--purple-rgb),0.08); border: 1px solid rgba(var(--purple-rgb),0.2); border-radius: 14px; padding: 16px; text-align: center; }
+.dev-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,var(--purple),var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; color: #fff; margin: 0 auto 10px; font-family: 'Orbitron', monospace; }
+.dev-name { font-weight: 700; color: #fff; font-size: 0.95rem; }
+.dev-role { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 3px; }
+.stat-row { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.stat-box { flex: 1; min-width: 80px; background: rgba(var(--cyan-rgb),0.08); border: 1px solid rgba(var(--cyan-rgb),0.2); border-radius: 12px; padding: 14px 10px; text-align: center; }
+.stat-num { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 700; color: var(--cyan); }
+.stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">{{ t('nav_home') }}</a>
+      <a href="{{ url_for('game') }}">{{ t('nav_games') }}</a>
+      <a href="{{ url_for('reting') }}">{{ t('nav_rating') }}</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">{{ t('nav_status') }}</a>
+      <a href="{{ url_for('kritik') }}">{{ t('nav_critique') }}</a>
+      <a href="{{ url_for('saran') }}">{{ t('nav_suggestion') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">{{ t('nav_logout') }}</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">{{ t('nav_donate') }}</a>
+      <a href="{{ url_for('report') }}" class="report-link">{{ t('nav_report_bug') }}</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+  <div class="about-wrap">
+    <div class="about-hero">
+      <div class="about-logo">TrustTop Up</div>
+      <div class="about-tagline">{{ t('about_tagline')|safe }}</div>
+    </div>
+
+    <div class="about-card">
+      <h2>{{ t('about_platform_title') }}</h2>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-num">6+</div><div class="stat-label">{{ t('about_stat_games') }}</div></div>
+        <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-label">{{ t('about_stat_service') }}</div></div>
+        <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label">{{ t('about_stat_secure') }}</div></div>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <h2>{{ t('about_title') }}</h2>
+      <p>{{ t('about_p1') }}</p>
+      <p>{{ t('about_p2') }}</p>
+      <p>{{ t('about_p3') }}</p>
+      <p>{{ t('about_p4') }}</p>
+    </div>
+
+    <div class="about-card">
+      <h2>{{ t('about_games_title') }}</h2>
+      <p>{{ t('about_games_desc') }}</p>
+      <div class="game-list">
+        <span class="game-tag">&#9670; Mobile Legends</span>
+        <span class="game-tag">&#9670; Free Fire</span>
+        <span class="game-tag">&#9670; PUBG Mobile</span>
+        <span class="game-tag">&#9670; Roblox</span>
+        <span class="game-tag">&#9670; Genshin Impact</span>
+        <span class="game-tag">&#9670; Honkai Star Rail</span>
+      </div>
+      <p style="margin-top:12px;">{{ t('about_games_more') }}</p>
+    </div>
+
+    <div class="about-card">
+      <h2>{{ t('about_commitment_title') }}</h2>
+      <p>&#10003; &nbsp;{{ t('about_commit_1') }}</p>
+      <p>&#10003; &nbsp;{{ t('about_commit_2') }}</p>
+      <p>&#10003; &nbsp;{{ t('about_commit_3') }}</p>
+      <p>&#10003; &nbsp;{{ t('about_commit_4') }}</p>
+      <p>&#10003; &nbsp;{{ t('about_commit_5') }}</p>
+      <p>&#10003; &nbsp;{{ t('about_commit_6') }}</p>
+    </div>
+
+    <div class="about-card">
+      <h2>{{ t('about_team_title') }}</h2>
+      <p>{{ t('about_team_desc') }}</p>
+      <div class="dev-row">
+        <div class="dev-card">
+          <div class="dev-avatar">A</div>
+          <div class="dev-name">Arya</div>
+          <div class="dev-role">{{ t('about_role_lead') }}</div>
+        </div>
+        <div class="dev-card">
+          <div class="dev-avatar">Z</div>
+          <div class="dev-name">Zuan</div>
+          <div class="dev-role">{{ t('about_role_dev_design') }}</div>
+        </div>
+        <div class="dev-card">
+          <div class="dev-avatar">R</div>
+          <div class="dev-name">Ridho</div>
+          <div class="dev-role">{{ t('about_role_dev') }}</div>
+        </div>
+      </div>
+      <p style="margin-top:14px;font-size:0.85rem;color:rgba(255,255,255,0.4);">{{ t('about_team_footer') }}</p>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; {{ t('back_to_home') }}</a>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()">&#10005;</button>
+    <div class="modal-title">{{ t('nav_donate') }}</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">{{ t('reting_donate_desc') }}</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">{{ t('btn_close') }}</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+function toggleMenu(){const m=document.getElementById('dotsMenu');if(m)m.classList.toggle('open');}
+function openDonate(e){if(e)e.preventDefault();const d=document.getElementById('donate-modal');if(d)d.classList.add('open');}
+function closeDonate(){const d=document.getElementById('donate-modal');if(d)d.classList.remove('open');}
+document.addEventListener('click',(e)=>{const menu=document.getElementById('dotsMenu');const btn=document.getElementById('dotsBtn');if(menu&&btn&&!menu.contains(e.target)&&e.target!==btn)menu.classList.remove('open');});
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

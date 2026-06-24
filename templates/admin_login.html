@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner's Room - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css' if current_theme == 'default' else 'style-' + current_theme + '.css') }}">
+<style>
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg);
+  }
+  .login-box {
+    background: #0e0e1e;
+    border: 1px solid rgba(var(--purple-rgb),0.35);
+    border-radius: 24px;
+    padding: 48px 36px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .login-logo {
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--purple-glow), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+  }
+  .login-box label {
+    display: block;
+    color: rgba(255,255,255,0.65);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .login-box input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(var(--purple-rgb),0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--purple-glow); }
+  .admin-login-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 1px;
+    margin-top: 18px;
+  }
+  .admin-login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,58,237,0.6); }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">TrustTop Up</div>
+    <div class="login-sub">Owner's Room</div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;color:#f87171;font-size:0.9rem;">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Username</label>
+      <input type="text" name="username" placeholder="Enter username" required autocomplete="off">
+      <label>Password</label>
+      <input type="password" name="password" placeholder="Enter password" required>
+      <button type="submit" class="admin-login-btn">LOGIN</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

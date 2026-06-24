@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Top Up {{ game.name }} - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='topup.css') }}">
+</head>
+<body>
+{% include '_pending_banner.html' %}
+<div id="main-site" class="visible">
+
+  <nav>
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+    <div class="nav-left">
+      <a href="/" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="/tentang">About</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/refund">Refund Policy</a>
+      <a href="/syarat">Terms &amp; Conditions</a>
+      <a href="/faq">FAQ</a>
+      <a href="/contact">Contact</a>
+      {% if not session.get('user_id') %}
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+      {% endif %}
+    </div>
+    <div class="nav-center"></div>
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      {% if not session.get('user_id') %}
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="topup-page">
+    <!-- Full-width game banner like OuraStore -->
+    <div class="topup-header">
+      <div class="topup-header-bg"></div>
+      <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="" class="topup-header-blur-img" onerror="this.style.display='none'">
+      <div class="topup-header-content">
+        <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" class="topup-header-img" onerror="this.style.display='none'">
+        <div class="topup-header-text">
+          <div class="topup-header-name">{{ game.name }}</div>
+          <div class="topup-header-pub">TrustTop Up</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-bar">
+      <div class="trust-bar-item">
+        <svg class="trust-bar-icon trust-icon-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Proses Cepat
+      </div>
+      <div class="trust-bar-item">
+        <svg class="trust-bar-icon trust-icon-wiggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        Layanan Chat 24/7
+      </div>
+      <div class="trust-bar-item">
+        <svg class="trust-bar-icon trust-icon-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+        Pembayaran Aman
+      </div>
+    </div>
+
+    <form id="topup-form" novalidate>
+      <input type="hidden" id="game-name" value="{{ game.name }}">
+      <input type="hidden" id="csrf-token-value" value="{{ csrf_token() }}">
+
+      <!-- STEP 1: Enter ID -->
+      <div class="topup-step">
+        <div class="topup-step-header">
+          <div class="step-number">1</div>
+          <div class="step-title">Enter ID</div>
+        </div>
+        <div class="topup-step-body">
+          <label for="user-id">{{ game.user_label }}</label>
+          <input type="text" id="user-id" placeholder="{{ game.user_placeholder }}" autocomplete="off">
+
+          {% if game.server_type == 'input' %}
+          <label for="server-id">{{ game.server_label }}</label>
+          <input type="text" id="server-id" placeholder="{{ game.server_placeholder }}" autocomplete="off">
+          {% elif game.server_type == 'select' %}
+          <label for="server-select">Server</label>
+          <select id="server-select">
+            <option value="Asia">Asia</option>
+            <option value="America">America</option>
+            <option value="Europe">Europe</option>
+            <option value="TW_HK_MO">TW/HK/MO</option>
+          </select>
+          {% endif %}
+
+          <label for="email">Email <span class="optional-tag">(optional, to receive an order confirmation)</span></label>
+          <input type="email" id="email" placeholder="your@email.com" autocomplete="off">
+        </div>
+      </div>
+
+      <!-- STEP 2: Choose Amount -->
+      <div class="topup-step">
+        <div class="topup-step-header">
+          <div class="step-number">2</div>
+          <div class="step-title">Select {{ game.currency_label }} Amount</div>
+        </div>
+        <div class="topup-step-body">
+          <div class="amount-grid" id="amount-grid">
+            {% for pkg in packages %}
+            <button type="button" class="amount-option" data-label="{{ pkg.diamond }}" data-price="{{ pkg.price }}" onclick="selectAmount(this)">
+              <div class="amount-option-label">{{ pkg.diamond }}</div>
+              <div class="amount-option-price">{{ pkg.price }}</div>
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Payment Method -->
+      <div class="topup-step">
+        <div class="topup-step-header">
+          <div class="step-number">3</div>
+          <div class="step-title">Select Payment Method</div>
+        </div>
+        <div class="topup-step-body">
+          <div class="payment-grid">
+            <button type="button" class="payment-option selected" data-method="Dana" onclick="selectPayment(this)">Dana</button>
+            <button type="button" class="payment-option" data-method="QRIS" onclick="selectPayment(this)">QRIS</button>
+          </div>
+
+          <label for="voucher-code" style="margin-top:18px;">Voucher Code <span class="optional-tag">(optional)</span></label>
+          <input type="text" id="voucher-code" placeholder="Enter voucher code" style="text-transform:uppercase;" autocomplete="off">
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- SUMMARY BAR (fixed bottom) -->
+  <div class="summary-bar">
+    <div class="summary-bar-info">
+      <div class="summary-bar-row"><span class="summary-bar-key">ID</span><span class="summary-bar-val" id="summary-id">-</span></div>
+      <div class="summary-bar-row"><span class="summary-bar-key">Item</span><span class="summary-bar-val" id="summary-item">-</span></div>
+      <div class="summary-bar-row"><span class="summary-bar-key">Payment</span><span class="summary-bar-val" id="summary-payment">Dana</span></div>
+    </div>
+    <div class="summary-bar-total">
+      <div class="summary-bar-total-label">Total</div>
+      <div class="summary-bar-total-amount" id="summary-total">Rp 0</div>
+    </div>
+    <button type="button" class="summary-bar-btn" id="summary-bar-btn" onclick="submitTopupForm()">Buy Now</button>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='topup.js') }}"></script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>

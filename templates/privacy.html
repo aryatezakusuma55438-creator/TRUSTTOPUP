@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - TrustTop Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
+<style>
+.policy-wrap{max-width:720px;margin:0 auto;padding:100px 16px 60px;}
+.policy-hero{background:linear-gradient(135deg,rgba(var(--purple-rgb),0.15),rgba(var(--cyan-rgb),0.08));border:1px solid rgba(var(--purple-rgb),0.3);border-radius:24px;padding:32px 24px;margin-bottom:24px;text-align:center;}
+.policy-title{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:8px;}
+.policy-sub{color:rgba(255,255,255,0.45);font-size:0.85rem;}
+.policy-card{background:var(--card-bg);border:1px solid rgba(var(--purple-rgb),0.18);border-radius:18px;padding:22px;margin-bottom:16px;}
+.policy-card h2{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--purple-glow);margin-bottom:10px;}
+.policy-card p,.policy-card li{color:rgba(255,255,255,0.6);font-size:0.9rem;line-height:1.75;margin-bottom:6px;}
+.policy-card ul{padding-left:18px;margin-top:6px;}
+.policy-card li{margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div id="main-site" class="visible">
+  {% if session.get("user_id") %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('index') }}?skip=1">Home</a>
+      <a href="{{ url_for('game') }}">Games</a>
+      <a href="{{ url_for('reting') }}">Ratings</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('status') }}">Order Status</a>
+      <a href="{{ url_for('kritik') }}">Kritik</a>
+      <a href="{{ url_for('saran') }}">Saran</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">Donate</a>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+      <div class="dots-menu-divider"></div>
+      
+      <a href="{{ url_for('dashboard') }}">{{ t('nav_dashboard') }}</a>
+      <a href="{{ url_for('logout_customer') }}" style="color:rgba(255,255,255,0.4);">Logout</a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Avatar -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+      
+    </div>
+  </nav>
+{% else %}
+  <nav>
+    <!-- Overlay for closing menu -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeMenu()"></div>
+
+    <!-- Left: Hamburger -->
+    <div class="nav-left">
+      
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="dots-menu" id="dotsMenu">
+      <div class="dots-menu-header">TrustTop Up</div>
+      <a href="{{ url_for('tentang') }}">About</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('refund') }}">Refund Policy</a>
+      <a href="{{ url_for('syarat') }}">Terms &amp; Conditions</a>
+      <a href="{{ url_for('faq') }}">FAQ</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <div class="dots-menu-divider"></div>
+      <a href="#" class="donate-link" onclick="openDonate(event)">Donate</a>
+      <a href="{{ url_for('report') }}" class="report-link">Report Bug</a>
+      <div class="dots-menu-divider"></div>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_login') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      </a>
+      <a href="{{ url_for('login') }}" class="dots-menu-item-icon">
+        {{ t('nav_register') }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+      </a>
+    </div>
+
+    <!-- Center: Logo -->
+    <div class="nav-center">
+      <a href="{{ url_for('index') }}" class="nav-logo-mark" aria-label="TrustTop Up"><span class="logo-t logo-t1">T</span><span class="logo-t logo-t2">T</span></a>
+    </div>
+
+    <!-- Right: Login button -->
+    <div class="nav-right">
+      <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMenu()">&#9776;</button>
+      <a href="{{ url_for('set_language', code='id' if current_lang=='en' else 'en') }}" class="nav-lang-pill">{{ 'ID' if current_lang=='en' else 'EN' }}</a>
+      <div class="tt-theme-switcher">
+        <button class="tt-theme-pill active" data-theme="default">Default</button>
+        <button class="tt-theme-pill" data-theme="simple">Simple</button>
+        <button class="tt-theme-pill" data-theme="modern">Modern</button>
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+
+{% if current_lang == 'id' %}
+    <div class="policy-wrap">
+    <div class="policy-hero">
+      <div class="policy-title">Kebijakan Privasi</div>
+      <div class="policy-sub">Terakhir diperbarui: Juni 2026 &nbsp;|&nbsp; Privasi kamu penting bagi kami.</div>
+    </div>
+
+    <div class="policy-card">
+      <h2>Ikhtisar</h2>
+      <p>TrustTop Up berkomitmen untuk melindungi privasi dan data pribadi semua pengguna. Kebijakan Privasi ini menjelaskan informasi apa yang kami kumpulkan, bagaimana kami menggunakannya, dan langkah-langkah yang kami ambil untuk menjaga keamanannya. Dengan menggunakan platform kami, kamu menyetujui praktik yang dijelaskan dalam kebijakan ini.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>1. Informasi yang Kami Kumpulkan</h2>
+      <p>Saat kamu menggunakan TrustTop Up, kami dapat mengumpulkan informasi berikut:</p>
+      <ul>
+        <li>User ID dan Server ID game yang diberikan saat checkout</li>
+        <li>Data pesanan dan transaksi (item yang dibeli, jumlah, waktu)</li>
+        <li>Informasi status pembayaran yang diterima dari payment gateway kami</li>
+        <li>Data teknis dasar seperti alamat IP dan jenis browser untuk tujuan keamanan</li>
+        <li>Masukan, rating, dan pesan yang dikirim melalui form kami</li>
+      </ul>
+      <p>Kami tidak mengumpulkan informasi pribadi sensitif seperti nama lengkap, nomor identitas nasional, atau detail kartu keuangan secara langsung. Data pembayaran ditangani sepenuhnya oleh penyedia payment gateway terpercaya kami.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>2. Bagaimana Kami Menggunakan Informasi Kamu</h2>
+      <p>Informasi yang kami kumpulkan hanya digunakan untuk tujuan berikut:</p>
+      <ul>
+        <li>Memproses dan menyelesaikan pesanan top up kamu</li>
+        <li>Memverifikasi status pembayaran dan mendeteksi aktivitas penipuan</li>
+        <li>Menyediakan dukungan pelanggan dan menyelesaikan perselisihan</li>
+        <li>Meningkatkan performa platform dan pengalaman pengguna</li>
+        <li>Mengirim notifikasi terkait pesanan jika diperlukan</li>
+      </ul>
+      <p>Kami tidak menggunakan data kamu untuk iklan, profiling, atau tujuan apapun yang tidak terkait dengan layanan kami.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>3. Pembagian Data</h2>
+      <p>Kami tidak menjual, menyewakan, atau memperdagangkan data pribadi kamu kepada pihak ketiga manapun. Informasi kamu hanya dapat dibagikan dalam keadaan terbatas berikut:</p>
+      <ul>
+        <li>Dengan penyedia payment gateway kami, hanya untuk tujuan memproses transaksi</li>
+        <li>Dengan penyedia layanan game, hanya sesuai yang diperlukan untuk menyelesaikan pesanan top up kamu</li>
+        <li>Saat diwajibkan oleh hukum atau sebagai respons terhadap proses hukum yang sah</li>
+      </ul>
+      <p>Semua mitra pihak ketiga yang kami kerjasamakan diwajibkan untuk menangani data kamu secara aman dan sesuai dengan regulasi privasi yang berlaku.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>4. Keamanan Data</h2>
+      <p>Kami menerapkan langkah-langkah keamanan standar industri untuk melindungi data kamu, termasuk:</p>
+      <ul>
+        <li>Enkripsi HTTPS untuk semua data yang ditransmisikan melalui platform kami</li>
+        <li>Perlindungan CSRF untuk mencegah pengiriman form yang tidak sah</li>
+        <li>Rate limiting dan perlindungan berbasis IP terhadap serangan brute force</li>
+        <li>Parameterized database query untuk mencegah SQL injection</li>
+        <li>Manajemen sesi yang aman dengan flag cookie HttpOnly dan Secure</li>
+      </ul>
+      <p>Meskipun kami mengambil semua langkah pencegahan yang wajar, tidak ada sistem yang 100% kebal dari ancaman keamanan. Kami mendorong pengguna untuk menerapkan kebiasaan browsing yang aman.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>5. Retensi Data</h2>
+      <p>Kami menyimpan data transaksi dan pesanan untuk periode yang wajar yang diperlukan untuk memenuhi kewajiban bisnis kami, mematuhi persyaratan hukum, dan menangani perselisihan apapun. Data non-esensial seperti masukan yang dikirimkan dapat disimpan untuk tujuan peningkatan layanan. Kamu dapat meminta penghapusan data kamu dengan menghubungi tim dukungan kami.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>6. Cookie</h2>
+      <p>TrustTop Up menggunakan cookie semata-mata untuk tujuan keamanan dan fungsionalitas, termasuk manajemen sesi dan verifikasi token CSRF. Kami tidak menggunakan cookie pelacakan, cookie iklan, atau cookie analitik pihak ketiga manapun.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>7. Hak Kamu</h2>
+      <p>Sebagai pengguna, kamu memiliki hak untuk:</p>
+      <ul>
+        <li>Meminta akses ke data pribadi yang kami simpan tentang kamu</li>
+        <li>Meminta koreksi data yang tidak akurat</li>
+        <li>Meminta penghapusan data kamu, sesuai dengan persyaratan hukum dan operasional</li>
+        <li>Menarik persetujuan pemrosesan data kapan saja</li>
+      </ul>
+      <p>Untuk menggunakan hak-hak ini, silakan hubungi kami di support@trusttopup.com.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>8. Perubahan Kebijakan</h2>
+      <p>Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu untuk mencerminkan perubahan dalam praktik kami atau hukum yang berlaku. Setiap perubahan signifikan akan dicantumkan di halaman ini dengan tanggal yang diperbarui. Penggunaan layanan kami yang berkelanjutan setelah perubahan diposting merupakan persetujuan kamu terhadap kebijakan yang direvisi.</p>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; Kembali ke Beranda</a>
+    </div>
+  </div>
+{% else %}
+  <div class="policy-wrap">
+    <div class="policy-hero">
+      <div class="policy-title">Privacy Policy</div>
+      <div class="policy-sub">Last updated: June 2026 &nbsp;|&nbsp; Your privacy is important to us.</div>
+    </div>
+
+    <div class="policy-card">
+      <h2>Overview</h2>
+      <p>TrustTop Up is committed to protecting the privacy and personal data of all users. This Privacy Policy explains what information we collect, how we use it, and the steps we take to keep it secure. By using our platform, you consent to the practices described in this policy.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>1. Information We Collect</h2>
+      <p>When you use TrustTop Up, we may collect the following information:</p>
+      <ul>
+        <li>Game User ID and Server ID provided during checkout</li>
+        <li>Order and transaction data (items purchased, amounts, timestamps)</li>
+        <li>Payment status information received from our payment gateway</li>
+        <li>Basic technical data such as IP address and browser type for security purposes</li>
+        <li>Feedback, ratings, and messages submitted through our forms</li>
+      </ul>
+      <p>We do not collect sensitive personal information such as full name, national ID number, or financial card details directly. Payment data is handled entirely by our trusted payment gateway provider.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>2. How We Use Your Information</h2>
+      <p>The information we collect is used solely for the following purposes:</p>
+      <ul>
+        <li>Processing and fulfilling your top-up orders</li>
+        <li>Verifying payment status and detecting fraudulent activity</li>
+        <li>Providing customer support and resolving disputes</li>
+        <li>Improving our platform's performance and user experience</li>
+        <li>Sending order-related notifications when applicable</li>
+      </ul>
+      <p>We do not use your data for advertising, profiling, or any purpose unrelated to our services.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>3. Data Sharing</h2>
+      <p>We do not sell, rent, or trade your personal data to any third parties. Your information may only be shared in the following limited circumstances:</p>
+      <ul>
+        <li>With our payment gateway provider, solely for the purpose of processing transactions</li>
+        <li>With game service providers, only as required to fulfill your top-up order</li>
+        <li>When required by law or in response to valid legal process</li>
+      </ul>
+      <p>All third-party partners we work with are required to handle your data securely and in accordance with applicable privacy regulations.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>4. Data Security</h2>
+      <p>We implement industry-standard security measures to protect your data, including:</p>
+      <ul>
+        <li>HTTPS encryption for all data transmitted through our platform</li>
+        <li>CSRF protection to prevent unauthorized form submissions</li>
+        <li>Rate limiting and IP-based protection against brute force attacks</li>
+        <li>Parameterized database queries to prevent SQL injection</li>
+        <li>Secure session management with HttpOnly and Secure cookie flags</li>
+      </ul>
+      <p>While we take all reasonable precautions, no system is 100% immune to security threats. We encourage users to practice safe browsing habits.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>5. Data Retention</h2>
+      <p>We retain transaction and order data for a reasonable period necessary to fulfill our business obligations, comply with legal requirements, and handle any disputes. Non-essential data such as feedback submissions may be retained for service improvement purposes. You may request deletion of your data by contacting our support team.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>6. Cookies</h2>
+      <p>TrustTop Up uses cookies strictly for security and functionality purposes, including session management and CSRF token verification. We do not use tracking cookies, advertising cookies, or any third-party analytics cookies.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>7. Your Rights</h2>
+      <p>As a user, you have the right to:</p>
+      <ul>
+        <li>Request access to the personal data we hold about you</li>
+        <li>Request correction of inaccurate data</li>
+        <li>Request deletion of your data, subject to legal and operational requirements</li>
+        <li>Withdraw consent to data processing at any time</li>
+      </ul>
+      <p>To exercise any of these rights, please contact us at support@trusttopup.com.</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>8. Policy Updates</h2>
+      <p>We may update this Privacy Policy from time to time to reflect changes in our practices or applicable laws. Any significant changes will be reflected on this page with the updated date. Continued use of our services after changes are posted constitutes your acceptance of the revised policy.</p>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;">
+      <a href="{{ url_for('index') }}" class="btn-primary" style="display:inline-block;padding:12px 32px;border-radius:12px;">&#8592; Back to Home</a>
+    </div>
+  </div>
+
+{% endif %}
+</div>
+
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeDonate()"></button>
+    <div class="modal-title">Donate</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin-top:8px;line-height:1.7;">Your donation means a lot to us. Thank you!</div>
+    <div class="donate-code">Dana / GoPay / OVO<br><br>0822-5818-5709<br><span style="font-size:0.85rem;opacity:0.7;">a.n. TrustTop Up</span></div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;border-radius:12px;" onclick="closeDonate()">Close</button>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+function toggleMenu(){const m=document.getElementById('dotsMenu');if(m)m.classList.toggle('open');}
+function openDonate(e){if(e)e.preventDefault();const d=document.getElementById('donate-modal');if(d)d.classList.add('open');}
+function closeDonate(){const d=document.getElementById('donate-modal');if(d)d.classList.remove('open');}
+document.addEventListener('click',(e)=>{const menu=document.getElementById('dotsMenu');const btn=document.getElementById('dotsBtn');if(menu&&btn&&!menu.contains(e.target)&&e.target!==btn)menu.classList.remove('open');});
+</script>
+<script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
+</body>
+</html>
