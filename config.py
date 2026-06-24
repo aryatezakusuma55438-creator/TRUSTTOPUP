@@ -16,7 +16,14 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 
-    DATABASE      = os.path.join(os.path.dirname(__file__), 'database.db')
+    # DATABASE PATH — on Railway (and most container hosts) the filesystem is EPHEMERAL:
+    # it gets wiped on every redeploy/restart unless you attach a persistent Volume.
+    # This is the #1 cause of "logs disappear after redeploy" on Railway.
+    # Fix: in Railway, add a Volume (e.g. mounted at /data), then set:
+    #   DATABASE_PATH=/data/database.db
+    # as an environment variable. Locally/without the env var it falls back to the
+    # original path next to app.py so nothing changes for local development.
+    DATABASE = os.environ.get('DATABASE_PATH') or os.path.join(os.path.dirname(__file__), 'database.db')
     ADMIN_USER    = os.environ.get('ADMIN_USER', '')
     ADMIN_PASS    = os.environ.get('ADMIN_PASS', '')
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'instance', 'uploads')

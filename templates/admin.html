@@ -179,6 +179,11 @@ body{background:#0a0a14;color:#fff;font-family:'Nunito',sans-serif;display:flex;
     <a class="nav-item" onclick="showTab('staffmgmt',this)" href="#">
       <span class="nav-icon">&#9787;</span><span>Staff Accounts</span>
     </a>
+    <div class="nav-section">Security</div>
+    <a class="nav-item" onclick="showTab('ipblocks',this)" href="#">
+      <span class="nav-icon">&#9888;</span><span>IP Blocking</span>
+      {% if blocked_ips %}<span class="nav-badge">{{ blocked_ips|length }}</span>{% endif %}
+    </a>
     <div class="nav-section">Site</div>
     <a class="nav-item" href="{{ url_for('index') }}" target="_blank">
       <span class="nav-icon">&#9654;</span><span>Lihat Site</span>
@@ -697,6 +702,65 @@ body{background:#0a0a14;color:#fff;font-family:'Nunito',sans-serif;display:flex;
       </div>
     </div>
 
+    <!-- ===== IP BLOCKING TAB (Owner only) ===== -->
+    <div class="tab-content" id="tab-ipblocks">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><div class="card-title">Block an IP Address</div></div>
+        <form method="POST" action="{{ url_for('admin_ip_block') }}" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">IP Address</label>
+            <input type="text" name="ip" class="form-input" placeholder="e.g. 203.0.113.42" required>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Duration</label>
+            <select name="duration" class="form-input">
+              <option value="1h">1 hour</option>
+              <option value="24h" selected>24 hours</option>
+              <option value="7d">7 days</option>
+              <option value="permanent">Permanent</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Reason (optional)</label>
+            <input type="text" name="reason" class="form-input" placeholder="e.g. abuse, fraud attempt" maxlength="200">
+          </div>
+          <button type="submit" class="btn-primary">Block IP</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Currently Blocked IPs ({{ blocked_ips|length }})</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>IP Address</th><th>Blocked Until</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for b in blocked_ips %}
+              <tr>
+                <td style="font-family:monospace;color:#fff;">{{ b.ip }}</td>
+                <td>
+                  {% if b.permanent %}
+                  <span class="badge badge-pending" style="background:rgba(239,68,68,0.15);color:#ef4444;">Permanent</span>
+                  {% else %}
+                  <span style="color:rgba(255,255,255,0.55);font-size:0.85rem;">{{ b.until_label }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin_ip_unblock') }}" onsubmit="return confirm('Unblock {{ b.ip }}?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="ip" value="{{ b.ip }}">
+                    <button type="submit" class="btn-danger btn-sm">Unblock</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not blocked_ips %}<tr><td colspan="3" style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);">No IPs are currently blocked.</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== ADMIN LOG TAB ===== -->
     <div class="tab-content" id="tab-adminlog">
       <div class="card">
@@ -740,7 +804,7 @@ function showTab(name,el){
   const tab=document.getElementById('tab-'+name);
   if(tab) tab.classList.add('active');
   if(el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',orders:'Orders',ratings:'Ratings',reports:'Reports',kritik:'Kritik',saran:'Saran',actlog:'Activity Logs',adminlog:'Admin Logs',vouchers:'Vouchers',staffmgmt:'Staff Accounts'};
+  const titles={dashboard:'Dashboard',orders:'Orders',ratings:'Ratings',reports:'Reports',kritik:'Kritik',saran:'Saran',actlog:'Activity Logs',adminlog:'Admin Logs',vouchers:'Vouchers',staffmgmt:'Staff Accounts',ipblocks:'IP Blocking'};
   document.getElementById('page-title').textContent=titles[name]||name;
   document.getElementById('page-sub').textContent=name==='dashboard'?'Welcome back, Admin':'TrustTop Up Admin Panel';
   if(name==='dashboard') renderChart();

@@ -12,7 +12,16 @@ import sqlite3
 import sqlite3 as _sq
 import os, time, re, hashlib, secrets, threading, requests, datetime
 import smtplib
+import logging, sys
 from email.mime.text import MIMEText
+
+# ---------- APP LOGGING (visible in Railway/hosting logs via stdout) ----------
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    stream=sys.stdout,
+)
+applog = logging.getLogger('trusttopup')
 from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
@@ -24,6 +33,17 @@ ALLOWED_EXTENSIONS = {'png','jpg','jpeg','gif','webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
+
+_IPV4_RE = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
+def is_valid_ip(ip):
+    """Loose IPv4/IPv6 sanity check — good enough to reject garbage input from the block form."""
+    if not ip or len(ip) > 64:
+        return False
+    if _IPV4_RE.match(ip):
+        return all(0 <= int(part) <= 255 for part in ip.split('.'))
+    if ':' in ip:  # very loose IPv6 check
+        return bool(re.match(r'^[0-9a-fA-F:]+$', ip))
+    return False
 
 # ---------- ROLE HELPERS ----------
 def is_admin_logged_in():
@@ -132,10 +152,13 @@ def inject_pending_order_banner():
     })
 
 # ---------- SHIELD DB ----------
-_SHIELD_DB = os.path.join(os.path.dirname(__file__), 'shield.db')
+# Same ephemeral-filesystem concern as the main DATABASE — see config.py comment.
+# Set SHIELD_DB_PATH (e.g. /data/shield.db, same Volume as DATABASE_PATH) on Railway
+# so manual IP blocks and rate-limit state survive redeploys.
+_SHIELD_DB = os.environ.get('SHIELD_DB_PATH') or os.path.join(os.path.dirname(__file__), 'shield.db')
 
 def _shield_init():
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.execute('PRAGMA journal_mode=WAL')
         db.execute('PRAGMA synchronous=NORMAL')
         db.execute('CREATE TABLE IF NOT EXISTS req_log (ip TEXT NOT NULL, ts REAL NOT NULL)')
@@ -160,7 +183,7 @@ def get_ip():
     return request.remote_addr
 
 def is_blocked(ip):
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.row_factory = _sq.Row
         row = db.execute('SELECT until FROM blocked WHERE ip=?',(ip,)).fetchone()
         if row:
@@ -169,12 +192,37 @@ def is_blocked(ip):
     return False
 
 def block_ip(ip,duration):
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.execute('INSERT OR REPLACE INTO blocked (ip,until) VALUES (?,?)',(ip,time.time()+duration)); db.commit()
+
+def unblock_ip(ip):
+    """Remove a manual/automatic IP block. Returns True if a row was actually removed."""
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+        cur = db.execute('DELETE FROM blocked WHERE ip=?',(ip,)); db.commit()
+        return cur.rowcount > 0
+
+def list_blocked_ips():
+    """All currently-blocked IPs (auto rate-limit blocks + manual Owner blocks), newest-expiring first."""
+    now = time.time()
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+        db.row_factory = _sq.Row
+        db.execute('DELETE FROM blocked WHERE until<?', (now,)); db.commit()
+        rows = db.execute('SELECT ip, until FROM blocked ORDER BY until DESC').fetchall()
+    out = []
+    for r in rows:
+        remaining = r['until'] - now
+        out.append({
+            'ip': r['ip'],
+            'until': r['until'],
+            'permanent': remaining > 60*60*24*365*5,  # treat 5+ year blocks as "Permanent" in the UI
+            'until_label': 'Permanent' if remaining > 60*60*24*365*5
+                           else datetime.datetime.fromtimestamp(r['until']).strftime('%Y-%m-%d %H:%M'),
+        })
+    return out
 
 def check_rate_limit(ip):
     now=time.time()
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.row_factory=_sq.Row
         db.execute('DELETE FROM req_log WHERE ts<?',(now-RATE_WINDOW,)); db.commit()
         count=db.execute('SELECT COUNT(*) as c FROM req_log WHERE ip=?',(ip,)).fetchone()['c']
@@ -185,7 +233,7 @@ def check_rate_limit(ip):
 
 def check_login_limit(ip):
     now=time.time()
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.row_factory=_sq.Row
         db.execute('DELETE FROM login_fail WHERE ts<?',(now-LOGIN_WINDOW,)); db.commit()
         count=db.execute('SELECT COUNT(*) as c FROM login_fail WHERE ip=?',(ip,)).fetchone()['c']
@@ -193,18 +241,18 @@ def check_login_limit(ip):
         return True,max(0,LOGIN_LIMIT-count)
 
 def record_login_fail(ip):
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.execute('INSERT INTO login_fail (ip,ts) VALUES (?,?)',(ip,time.time())); db.commit()
 
 def clear_login_fail(ip):
-    with _sq.connect(_SHIELD_DB) as db:
+    with _sq.connect(_SHIELD_DB, timeout=15) as db:
         db.execute('DELETE FROM login_fail WHERE ip=?',(ip,)); db.commit()
 
 def _scheduled_cleanup():
     while True:
         time.sleep(300)
         try:
-            with _sq.connect(_SHIELD_DB) as db:
+            with _sq.connect(_SHIELD_DB, timeout=15) as db:
                 now=time.time()
                 db.execute('DELETE FROM req_log WHERE ts<?',(now-RATE_WINDOW,))
                 db.execute('DELETE FROM login_fail WHERE ts<?',(now-LOGIN_WINDOW,))
@@ -478,21 +526,36 @@ def now_wib():
     return datetime.datetime.now(WIB).strftime('%Y-%m-%d %H:%M:%S')
 
 def log_activity(action, detail='', status_code=200):
-    try:
-        ip=get_ip(); method=request.method; path=request.path
-        db=get_db()
-        db.execute('INSERT INTO activity_log (ip,method,path,action,detail,status_code,created_at) VALUES (?,?,?,?,?,?,?)',
-                   (ip,method,path,action,str(detail)[:500],status_code,now_wib()))
-        db.commit()
-    except Exception: pass
+    ip = get_ip(); method = request.method; path = request.path
+    for attempt in (1, 2):
+        try:
+            db = get_db()
+            db.execute('INSERT INTO activity_log (ip,method,path,action,detail,status_code,created_at) VALUES (?,?,?,?,?,?,?)',
+                       (ip, method, path, action, str(detail)[:500], status_code, now_wib()))
+            db.commit()
+            return
+        except Exception as e:
+            applog.error(f"log_activity FAILED (attempt {attempt}) action={action!r} ip={ip} db={app.config['DATABASE']!r}: {e!r}")
+            if attempt == 1:
+                time.sleep(0.2)  # brief pause in case it was a transient 'database is locked'
+            else:
+                applog.error(f"log_activity GIVING UP after 2 attempts — activity NOT recorded for action={action!r} ip={ip}")
 
 def log_admin(action, detail=''):
-    try:
-        ip=get_ip(); db=get_db()
-        db.execute('INSERT INTO admin_log (ip,action,detail,created_at) VALUES (?,?,?,?)',
-                   (ip,action,str(detail)[:500],now_wib()))
-        db.commit()
-    except Exception: pass
+    ip = get_ip()
+    for attempt in (1, 2):
+        try:
+            db = get_db()
+            db.execute('INSERT INTO admin_log (ip,action,detail,created_at) VALUES (?,?,?,?)',
+                       (ip, action, str(detail)[:500], now_wib()))
+            db.commit()
+            return
+        except Exception as e:
+            applog.error(f"log_admin FAILED (attempt {attempt}) action={action!r} ip={ip} db={app.config['DATABASE']!r}: {e!r}")
+            if attempt == 1:
+                time.sleep(0.2)
+            else:
+                applog.error(f"log_admin GIVING UP after 2 attempts — admin action NOT recorded: {action!r}")
 
 # ---------- SECURITY MIDDLEWARE ----------
 @app.before_request
@@ -503,8 +566,8 @@ def security_check():
 
 @app.after_request
 def auto_log_and_headers(response):
-    try:
-        if not request.path.startswith('/static') and not request.path.startswith('/uploads'):
+    if not request.path.startswith('/static') and not request.path.startswith('/uploads'):
+        try:
             ip=get_ip(); method=request.method; path=request.path; status=response.status_code
             action_map={
                 '/':'Open Home Page','/game':'Open Games Page','/checkout':'Process Checkout',
@@ -527,7 +590,12 @@ def auto_log_and_headers(response):
             db.execute('INSERT INTO activity_log (ip,method,path,action,detail,status_code,created_at) VALUES (?,?,?,?,?,?,?)',
                        (ip,method,path,detail or action,detail,status,now_wib()))
             db.commit()
-    except Exception: pass
+        except Exception as e:
+            # Previously this failed silently (except Exception: pass), which is exactly why
+            # missing customer logs on Railway went unnoticed. Now it's surfaced in stdout
+            # so it shows up in `railway logs` / the deployment's log viewer.
+            applog.error(f"auto_log_and_headers FAILED to write activity_log for {request.path!r} "
+                         f"db={app.config.get('DATABASE')!r}: {e!r}")
     response.headers['X-Content-Type-Options']  = 'nosniff'
     response.headers['X-Frame-Options']          = 'DENY'
     response.headers['X-XSS-Protection']         = '1; mode=block'
@@ -555,9 +623,14 @@ def forbidden(e): return render_template('403.html'),403
 
 # ---------- MAIN DB ----------
 def get_db():
-    db=sqlite3.connect(app.config['DATABASE'])
-    db.row_factory=sqlite3.Row
+    try:
+        db = sqlite3.connect(app.config['DATABASE'], timeout=15)
+    except Exception as e:
+        applog.error(f"get_db: FAILED to open database at {app.config['DATABASE']!r}: {e!r}")
+        raise
+    db.row_factory = sqlite3.Row
     db.execute('PRAGMA journal_mode=WAL')
+    db.execute('PRAGMA busy_timeout=15000')  # wait up to 15s instead of failing instantly under concurrent writes
     return db
 
 def init_db():
@@ -1359,12 +1432,13 @@ def admin():
         # Owner sees the full dashboard: revenue, admin logs, voucher & staff management
         adm_logs    = [dict(r) for r in db.execute('SELECT * FROM admin_log ORDER BY created_at DESC LIMIT 200').fetchall()]
         admin_users = [dict(r) for r in db.execute("SELECT id, username, role, created_at FROM admin_users ORDER BY created_at ASC").fetchall()]
+        blocked_ips = list_blocked_ips()
         return render_template('admin.html',
             orders=orders, stats=stats, reports=reports, kritiks=kritiks,
             sarans=sarans, ratings=ratings, act_logs=act_logs, admin_logs=adm_logs,
             users=users, status_labels=STATUS_LABELS, vouchers=vouchers,
             admin_users=admin_users, is_owner=True, admin_role='owner',
-            admin_username=session.get('admin_user',''),
+            admin_username=session.get('admin_user',''), blocked_ips=blocked_ips,
         )
     else:
         # Staff sees a restricted dashboard: no revenue figure, no admin logs / staff management
@@ -1420,6 +1494,55 @@ def admin_staff_delete(staff_id):
     db.commit()
     log_admin('Staff Deleted', f"Owner '{session.get('admin_user')}' deleted staff account '{row['username']}'")
     flash(f"Staff account '{row['username']}' deleted.",'success')
+    return redirect(url_for('admin'))
+
+# ---------- OWNER ONLY: IP BLOCKING ----------
+_BLOCK_DURATIONS = {
+    '1h':   60*60,
+    '24h':  60*60*24,
+    '7d':   60*60*24*7,
+    'permanent': 60*60*24*365*100,  # treated as "Permanent" by list_blocked_ips()
+}
+
+@app.route('/admin/ip-block', methods=['POST'])
+def admin_ip_block():
+    # Backend permission check — this is the real enforcement, independent of any
+    # frontend hiding of the button/page. Staff/Admin/Moderator get a 403 even if
+    # they discover this URL and POST to it directly.
+    require_owner()
+
+    ip       = request.form.get('ip','').strip()
+    duration = request.form.get('duration','24h')
+    reason   = sanitize(request.form.get('reason','').strip())
+
+    if not is_valid_ip(ip):
+        flash('Please enter a valid IPv4 or IPv6 address.','error')
+        return redirect(url_for('admin'))
+    if duration not in _BLOCK_DURATIONS:
+        duration = '24h'
+
+    block_ip(ip, _BLOCK_DURATIONS[duration])
+    label = 'Permanent' if duration == 'permanent' else duration
+    log_admin('IP Blocked', f"Owner '{session.get('admin_user')}' blocked {ip} ({label})"
+                            + (f" — reason: {reason}" if reason else ""))
+    flash(f"IP {ip} has been blocked ({label}).", 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/ip-unblock', methods=['POST'])
+def admin_ip_unblock():
+    require_owner()
+
+    ip = request.form.get('ip','').strip()
+    if not is_valid_ip(ip):
+        flash('Invalid IP address.','error')
+        return redirect(url_for('admin'))
+
+    removed = unblock_ip(ip)
+    if removed:
+        log_admin('IP Unblocked', f"Owner '{session.get('admin_user')}' unblocked {ip}")
+        flash(f"IP {ip} has been unblocked.", 'success')
+    else:
+        flash(f"IP {ip} was not in the blocked list.", 'error')
     return redirect(url_for('admin'))
 
 # ---------- OWNER ONLY: VOUCHER MANAGEMENT ----------
