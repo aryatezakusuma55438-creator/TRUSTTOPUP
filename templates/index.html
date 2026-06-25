@@ -345,7 +345,7 @@
       <button class="tt-car-arrow tt-car-prev" aria-label="Previous">&#8249;</button>
       <div class="tt-carousel-track">
         {% for game in games %}
-        <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-car-card">
+        <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-car-card" data-original="1">
           {% if game.badge %}<span class="tt-car-badge">{{ game.badge }}</span>{% endif %}
           <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" loading="lazy">
           <div class="tt-car-info">
@@ -370,7 +370,7 @@
       <button class="tt-car-arrow tt-car-prev" aria-label="Previous">&#8249;</button>
       <div class="tt-carousel-track">
         {% for game in games|reverse %}
-        <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-car-card tt-car-card-seller">
+        <a href="{{ url_for('topup_page', slug=game.slug) }}" class="tt-car-card tt-car-card-seller" data-original="1">
           <img src="{{ url_for('static', filename='game/' + game.image) }}" alt="{{ game.name }}" loading="lazy">
           <div class="tt-car-info">
             <div class="tt-car-name">{{ game.name }}</div>
@@ -557,6 +557,7 @@ document.querySelectorAll('.cat-tab').forEach(function(btn) {
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script src="{{ url_for('static', filename='notif.js') }}"></script>
 <script src="{{ url_for('static', filename='carousel.js') }}"></script>
+<script src="{{ url_for('static', filename='coverflow.js') }}"></script>
 <script src="{{ url_for('static', filename='theme-switcher.js') }}"></script>
 </body>
 </html>

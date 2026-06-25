@@ -1512,17 +1512,35 @@ def admin_ip_block():
     require_owner()
 
     ip       = request.form.get('ip','').strip()
-    duration = request.form.get('duration','24h')
+    mode     = request.form.get('duration_mode','preset')
     reason   = sanitize(request.form.get('reason','').strip())
 
     if not is_valid_ip(ip):
         flash('Please enter a valid IPv4 or IPv6 address.','error')
         return redirect(url_for('admin'))
-    if duration not in _BLOCK_DURATIONS:
-        duration = '24h'
 
-    block_ip(ip, _BLOCK_DURATIONS[duration])
-    label = 'Permanent' if duration == 'permanent' else duration
+    if mode == 'manual':
+        unit_seconds = {'minutes': 60, 'hours': 60*60, 'days': 60*60*24}
+        unit = request.form.get('manual_unit', 'hours')
+        try:
+            value = int(request.form.get('manual_value', '').strip())
+        except (TypeError, ValueError):
+            flash('Please enter a valid whole number for the manual duration.', 'error')
+            return redirect(url_for('admin'))
+        if value <= 0 or unit not in unit_seconds:
+            flash('Manual duration must be a positive number with a valid unit.', 'error')
+            return redirect(url_for('admin'))
+        seconds = value * unit_seconds[unit]
+        seconds = min(seconds, _BLOCK_DURATIONS['permanent'])  # cap absurd values at the "permanent" ceiling
+        label = f"{value} {unit}"
+    else:
+        duration = request.form.get('duration', '24h')
+        if duration not in _BLOCK_DURATIONS:
+            duration = '24h'
+        seconds = _BLOCK_DURATIONS[duration]
+        label = 'Permanent' if duration == 'permanent' else duration
+
+    block_ip(ip, seconds)
     log_admin('IP Blocked', f"Owner '{session.get('admin_user')}' blocked {ip} ({label})"
                             + (f" — reason: {reason}" if reason else ""))
     flash(f"IP {ip} has been blocked ({label}).", 'success')

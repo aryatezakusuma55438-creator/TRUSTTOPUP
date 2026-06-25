@@ -20,6 +20,7 @@
     document.querySelectorAll('.tt-theme-pill').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-theme') === theme);
     });
+    window.dispatchEvent(new CustomEvent('tt-theme-change', { detail: { theme: theme } }));
   }
 
   function setTheme(theme) {
