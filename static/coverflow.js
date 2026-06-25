@@ -36,21 +36,18 @@
     var cards = Array.prototype.slice.call(track.querySelectorAll('.tt-car-card[data-original]'));
     if (cards.length < 2) return null;
 
+    // Box sizing (width/height/position/left) is owned entirely by CSS
+    // (see modern.css [data-coverflow] rules, with breakpoint variants).
+    // JS only ever touches transform/opacity/filter/z-index per frame —
+    // mixing JS-measured pixel sizes in here was what let cards collapse
+    // or balloon once they left the normal flex flow.
     cards.forEach(function (card) {
       card.style.position = 'absolute';
       card.style.top = '0';
       card.style.left = '50%';
-      card.style.marginLeft = -(card.getBoundingClientRect().width / 2 || 90) + 'px';
       card.style.willChange = 'transform, opacity, filter';
-      card.style.transform = 'translate3d(0,0,0)';
     });
 
-    var maxH = cards.reduce(function (m, c) { return Math.max(m, c.getBoundingClientRect().height); }, 0);
-    track.style.position = 'relative';
-    track.style.height = (maxH + 30) + 'px';
-    track.style.overflow = 'visible';
-    track.style.touchAction = 'pan-y';
-    track.style.perspective = '1500px';
     track.style.transformStyle = 'preserve-3d';
     track.style.cursor = 'grab';
 
@@ -100,7 +97,7 @@
       card.style.pointerEvents = absD > state.n / 2 - 0.5 ? 'none' : 'auto';
       card.style.setProperty('--cf-d', Math.max(0, 1 - absD).toFixed(3));
       card.style.transform =
-        'translate3d(' + tx.toFixed(1) + 'px,' + floatY.toFixed(1) + 'px,' + tz.toFixed(1) + 'px) ' +
+        'translate(-50%,0) translate3d(' + tx.toFixed(1) + 'px,' + floatY.toFixed(1) + 'px,' + tz.toFixed(1) + 'px) ' +
         'rotateY(' + rot.toFixed(1) + 'deg)' + hoverExtra + ' scale(' + scale.toFixed(3) + ')';
     });
   }
@@ -260,12 +257,10 @@
       stopMomentum(state);
       if (state._floatRaf) { cancelAnimationFrame(state._floatRaf); state._floatRaf = null; }
       state.cards.forEach(function (card) {
-        ['position', 'top', 'left', 'marginLeft', 'transform', 'opacity', 'filter',
+        ['position', 'top', 'left', 'transform', 'opacity', 'filter',
          'zIndex', 'transition', 'pointerEvents', 'willChange'].forEach(function (p) { card.style[p] = ''; });
       });
-      state.track.style.position = state.track.style.height = state.track.style.overflow =
-        state.track.style.touchAction = state.track.style.perspective =
-        state.track.style.transformStyle = state.track.style.cursor = '';
+      state.track.style.transformStyle = state.track.style.cursor = '';
     }
     root._ttPlay && root._ttPlay();
   }

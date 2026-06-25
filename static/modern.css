@@ -173,10 +173,41 @@ body.theme-modern .tt-car-next { right: -8px; }
    ==================================================================== */
 body.theme-modern .tt-carousel[data-coverflow="1"] {
   perspective: 1500px;
+  /* Fixed, CSS-driven height — NOT measured by JS. Absolutely-positioned
+     children never expand an ancestor's auto height, so relying on a JS
+     measurement was exactly what let cards bleed into the sections below.
+     Height includes headroom for the center card's 1.3x scale + float bob. */
+  height: 340px;
+  overflow: visible;
 }
 body.theme-modern .tt-carousel[data-coverflow="1"] .tt-carousel-track {
   overflow: visible !important; scroll-snap-type: none !important;
   transform-style: preserve-3d; will-change: transform;
+  position: relative; height: 100%; touch-action: pan-y;
+}
+/* Clip horizontally at the section boundary so side/outer cards never cause
+   a page-level horizontal scrollbar, while the track itself stays
+   overflow:visible so the 3D depth isn't clipped right at its own edge. */
+body.theme-modern .tt-section-carousel { overflow-x: hidden; overflow-y: visible; }
+
+/* Card box size is fixed per breakpoint here, not measured — this is what
+   actually fixes the runaway sizing: position:absolute removes the old
+   flex-basis width, and an unconstrained <img width:100%> inside an
+   auto-width absolute box was free to balloon to its natural pixel size. */
+body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card {
+  width: 200px; height: 230px;
+}
+body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card img { height: 150px; }
+
+@media (max-width: 1024px) {
+  body.theme-modern .tt-carousel[data-coverflow="1"] { height: 270px; }
+  body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card { width: 160px; height: 185px; }
+  body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card img { height: 115px; }
+}
+@media (max-width: 640px) {
+  body.theme-modern .tt-carousel[data-coverflow="1"] { height: 215px; }
+  body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card { width: 130px; height: 150px; }
+  body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card img { height: 92px; }
 }
 /* Hide the legacy engine's clones entirely while coverflow owns the view */
 body.theme-modern .tt-carousel[data-coverflow="1"] .tt-car-card:not([data-original]) {
