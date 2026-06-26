@@ -63,12 +63,23 @@ class CompatCursor:
         pg_query = _to_pg_params(translate_schema(query))
         self._cur.execute(pg_query, params)
         if pg_query.strip().upper().startswith('INSERT'):
+            # Not every INSERT targets a table with a SERIAL/sequence column
+            # (req_log, login_fail, blocked don't have one). lastval() fails
+            # in that case — and a failed statement poisons the WHOLE
+            # transaction in Postgres until rolled back, even if Python
+            # catches the exception. A SAVEPOINT isolates that failure so
+            # the real INSERT just before it survives and commit() still works.
             try:
+                self._cur.execute('SAVEPOINT lastval_sp')
                 self._cur.execute('SELECT lastval()')
                 self.lastrowid = self._cur.fetchone()[0]
+                self._cur.execute('RELEASE SAVEPOINT lastval_sp')
             except Exception:
-                # Table has no SERIAL/IDENTITY column touched this transaction — fine, not every INSERT needs lastrowid.
                 self.lastrowid = None
+                try:
+                    self._cur.execute('ROLLBACK TO SAVEPOINT lastval_sp')
+                except Exception:
+                    pass
         return self
 
     def fetchone(self):
