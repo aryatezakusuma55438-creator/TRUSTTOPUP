@@ -20,8 +20,8 @@ if not os.environ.get('DATABASE_URL'):
     print("ERROR: DATABASE_URL is not set. Set it to your Railway Postgres connection string first.")
     sys.exit(1)
 
-import psycopg2
-import psycopg2.extras
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import db_compat  # noqa: E402  (reuses the app's own SQLite<->Postgres shim — pg8000-backed, no native deps)
 
 SQLITE_PATH = os.environ.get('OLD_DATABASE_PATH', 'database.db')
 
@@ -30,7 +30,6 @@ if not os.path.exists(SQLITE_PATH):
     sys.exit(1)
 
 # Make sure the destination tables exist before copying into them.
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app import init_db  # noqa: E402  (reuses the app's own schema definitions, kept in one place)
 init_db()
 
@@ -39,8 +38,7 @@ TABLES = ['orders', 'reports', 'kritik', 'saran', 'ratings',
 
 src = sqlite3.connect(SQLITE_PATH)
 src.row_factory = sqlite3.Row
-dst = psycopg2.connect(os.environ['DATABASE_URL'])
-dst_cur = dst.cursor()
+dst = db_compat.connect(None)  # database_path arg is ignored when DATABASE_URL is set
 
 total = 0
 for table in TABLES:
@@ -55,23 +53,22 @@ for table in TABLES:
 
     cols = rows[0].keys()
     col_list = ','.join(cols)
-    placeholders = ','.join(['%s'] * len(cols))
+    placeholders = ','.join(['?'] * len(cols))  # db_compat translates '?' -> '%s' for us
     sql = f'INSERT INTO {table} ({col_list}) VALUES ({placeholders}) ON CONFLICT (id) DO NOTHING'
 
     for row in rows:
-        dst_cur.execute(sql, tuple(row[c] for c in cols))
+        dst.execute(sql, tuple(row[c] for c in cols))
     dst.commit()
 
     # Keep the SERIAL sequence in sync so the NEXT insert (a real new order,
     # signup, etc.) doesn't collide with an id we just copied in manually.
-    dst_cur.execute(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
-                     f"COALESCE((SELECT MAX(id) FROM {table}), 1))")
+    dst.execute(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
+                f"COALESCE((SELECT MAX(id) FROM {table}), 1))")
     dst.commit()
 
     print(f"  {table}: copied {len(rows)} rows")
     total += len(rows)
 
 src.close()
-dst_cur.close()
 dst.close()
 print(f"\nDone — {total} total rows migrated into PostgreSQL.")
