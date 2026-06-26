@@ -1,13 +1,14 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify, send_from_directory, Response
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from authlib.integrations.flask_client import OAuth
 from config import Config
 from translations import get_translator
+import db_compat
 import sqlite3
 import sqlite3 as _sq
 import os, time, re, hashlib, secrets, threading, requests, datetime
@@ -158,9 +159,10 @@ def inject_pending_order_banner():
 _SHIELD_DB = os.environ.get('SHIELD_DB_PATH') or os.path.join(os.path.dirname(__file__), 'shield.db')
 
 def _shield_init():
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
-        db.execute('PRAGMA journal_mode=WAL')
-        db.execute('PRAGMA synchronous=NORMAL')
+    with db_compat.shield_connect(_SHIELD_DB) as db:
+        if not db_compat.USE_POSTGRES:
+            db.execute('PRAGMA journal_mode=WAL')
+            db.execute('PRAGMA synchronous=NORMAL')
         db.execute('CREATE TABLE IF NOT EXISTS req_log (ip TEXT NOT NULL, ts REAL NOT NULL)')
         db.execute('CREATE TABLE IF NOT EXISTS blocked (ip TEXT PRIMARY KEY, until REAL NOT NULL)')
         db.execute('CREATE TABLE IF NOT EXISTS login_fail (ip TEXT NOT NULL, ts REAL NOT NULL)')
@@ -183,7 +185,7 @@ def get_ip():
     return request.remote_addr
 
 def is_blocked(ip):
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.row_factory = _sq.Row
         row = db.execute('SELECT until FROM blocked WHERE ip=?',(ip,)).fetchone()
         if row:
@@ -192,19 +194,19 @@ def is_blocked(ip):
     return False
 
 def block_ip(ip,duration):
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.execute('INSERT OR REPLACE INTO blocked (ip,until) VALUES (?,?)',(ip,time.time()+duration)); db.commit()
 
 def unblock_ip(ip):
     """Remove a manual/automatic IP block. Returns True if a row was actually removed."""
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         cur = db.execute('DELETE FROM blocked WHERE ip=?',(ip,)); db.commit()
         return cur.rowcount > 0
 
 def list_blocked_ips():
     """All currently-blocked IPs (auto rate-limit blocks + manual Owner blocks), newest-expiring first."""
     now = time.time()
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.row_factory = _sq.Row
         db.execute('DELETE FROM blocked WHERE until<?', (now,)); db.commit()
         rows = db.execute('SELECT ip, until FROM blocked ORDER BY until DESC').fetchall()
@@ -222,7 +224,7 @@ def list_blocked_ips():
 
 def check_rate_limit(ip):
     now=time.time()
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.row_factory=_sq.Row
         db.execute('DELETE FROM req_log WHERE ts<?',(now-RATE_WINDOW,)); db.commit()
         count=db.execute('SELECT COUNT(*) as c FROM req_log WHERE ip=?',(ip,)).fetchone()['c']
@@ -233,7 +235,7 @@ def check_rate_limit(ip):
 
 def check_login_limit(ip):
     now=time.time()
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.row_factory=_sq.Row
         db.execute('DELETE FROM login_fail WHERE ts<?',(now-LOGIN_WINDOW,)); db.commit()
         count=db.execute('SELECT COUNT(*) as c FROM login_fail WHERE ip=?',(ip,)).fetchone()['c']
@@ -241,18 +243,18 @@ def check_login_limit(ip):
         return True,max(0,LOGIN_LIMIT-count)
 
 def record_login_fail(ip):
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.execute('INSERT INTO login_fail (ip,ts) VALUES (?,?)',(ip,time.time())); db.commit()
 
 def clear_login_fail(ip):
-    with _sq.connect(_SHIELD_DB, timeout=15) as db:
+    with db_compat.shield_connect(_SHIELD_DB) as db:
         db.execute('DELETE FROM login_fail WHERE ip=?',(ip,)); db.commit()
 
 def _scheduled_cleanup():
     while True:
         time.sleep(300)
         try:
-            with _sq.connect(_SHIELD_DB, timeout=15) as db:
+            with db_compat.shield_connect(_SHIELD_DB) as db:
                 now=time.time()
                 db.execute('DELETE FROM req_log WHERE ts<?',(now-RATE_WINDOW,))
                 db.execute('DELETE FROM login_fail WHERE ts<?',(now-LOGIN_WINDOW,))
@@ -624,18 +626,42 @@ def forbidden(e): return render_template('403.html'),403
 # ---------- MAIN DB ----------
 def get_db():
     try:
-        db = sqlite3.connect(app.config['DATABASE'], timeout=15)
+        db = db_compat.connect(app.config['DATABASE'])
     except Exception as e:
-        applog.error(f"get_db: FAILED to open database at {app.config['DATABASE']!r}: {e!r}")
+        applog.error(f"get_db: FAILED to open database ({'Postgres' if db_compat.USE_POSTGRES else 'SQLite'} "
+                     f"at {app.config['DATABASE']!r}): {e!r}")
         raise
-    db.row_factory = sqlite3.Row
-    db.execute('PRAGMA journal_mode=WAL')
-    db.execute('PRAGMA busy_timeout=15000')  # wait up to 15s instead of failing instantly under concurrent writes
     return db
 
 def init_db():
     with app.app_context():
         db=get_db()
+        # Payment proof images: when running on Postgres these are stored
+        # IN THE DATABASE (so they survive Railway's ephemeral filesystem
+        # being wiped on redeploy). On local SQLite they're stored the
+        # same way too, for consistency, but app.py only actually reads
+        # from here when db_compat.USE_POSTGRES — locally it still saves
+        # to UPLOAD_FOLDER on disk as before, since there's no persistence
+        # concern in local development.
+        if db_compat.USE_POSTGRES:
+            db.execute('''CREATE TABLE IF NOT EXISTS payment_proofs (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER NOT NULL,
+                filename TEXT UNIQUE NOT NULL,
+                content_type TEXT,
+                data BYTEA NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )''')
+        else:
+            db.execute('''CREATE TABLE IF NOT EXISTS payment_proofs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL,
+                filename TEXT UNIQUE NOT NULL,
+                content_type TEXT,
+                data BLOB NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )''')
+        db.commit()
         # Orders table dengan kolom manual payment
         db.execute('''CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1006,8 +1032,21 @@ def upload_proof(order_id):
 
     ext      = file.filename.rsplit('.',1)[1].lower()
     filename = f'proof_{order_id}_{secrets.token_hex(8)}.{ext}'
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(filepath)
+    file_bytes = file.read()
+
+    if db_compat.USE_POSTGRES:
+        # Stored in the database itself — survives Railway wiping the
+        # container's disk on redeploy, unlike a plain saved file would.
+        content_type = file.mimetype or 'application/octet-stream'
+        db.execute(
+            'INSERT INTO payment_proofs (order_id, filename, content_type, data) VALUES (?,?,?,?)',
+            (order_id, filename, content_type, file_bytes)
+        )
+        db.commit()
+    else:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        with open(filepath, 'wb') as f:
+            f.write(file_bytes)
 
     db.execute(
         'UPDATE orders SET payment_proof=?, payment=?, status=? WHERE id=?',
@@ -1113,6 +1152,13 @@ def uploaded_file(filename):
     # Validasi filename aman
     safe = secure_filename(filename)
     if safe != filename: abort(400)
+
+    if db_compat.USE_POSTGRES:
+        db = get_db()
+        row = db.execute('SELECT data, content_type FROM payment_proofs WHERE filename=?', (safe,)).fetchone()
+        if not row: abort(404)
+        return Response(bytes(row['data']), mimetype=row['content_type'] or 'application/octet-stream')
+
     return send_from_directory(app.config['UPLOAD_FOLDER'], safe)
 
 # ---------- RIWAYAT ADMIN ----------
