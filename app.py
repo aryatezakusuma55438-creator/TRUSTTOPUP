@@ -194,8 +194,17 @@ def is_blocked(ip):
     return False
 
 def block_ip(ip,duration):
+    until = time.time()+duration
     with db_compat.shield_connect(_SHIELD_DB) as db:
-        db.execute('INSERT OR REPLACE INTO blocked (ip,until) VALUES (?,?)',(ip,time.time()+duration)); db.commit()
+        if db_compat.USE_POSTGRES:
+            # "INSERT OR REPLACE" is SQLite-only syntax — Postgres has no idea
+            # what that means and throws a syntax error. ON CONFLICT...DO
+            # UPDATE is the Postgres-native equivalent for the same "upsert"
+            # behavior (insert, or overwrite if this ip is already blocked).
+            db.execute('INSERT INTO blocked (ip,until) VALUES (?,?) ON CONFLICT (ip) DO UPDATE SET until=EXCLUDED.until',(ip,until))
+        else:
+            db.execute('INSERT OR REPLACE INTO blocked (ip,until) VALUES (?,?)',(ip,until))
+        db.commit()
 
 def unblock_ip(ip):
     """Remove a manual/automatic IP block. Returns True if a row was actually removed."""
