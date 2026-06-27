@@ -24,6 +24,7 @@ CREATE TABLE/ALTER TABLE statements in init_db() route through this.
 import os
 import re
 import sqlite3
+import datetime as _dt
 from urllib.parse import urlparse
 
 USE_POSTGRES = bool(os.environ.get('DATABASE_URL'))
@@ -40,6 +41,19 @@ def _to_pg_params(query):
     return query.replace('?', '%s')
 
 
+def _normalize_value(v):
+    """pg8000 returns TIMESTAMP/DATE columns as native datetime.datetime /
+    datetime.date objects. SQLite, by contrast, always stored these as
+    plain TEXT strings ("2026-06-26 10:48:00") — and templates throughout
+    this app slice that string directly (e.g. `o.created_at[:16]`), which
+    breaks with a real datetime object. Converting back to the same
+    string shape here keeps every template working unmodified, regardless
+    of backend."""
+    if isinstance(v, (_dt.datetime, _dt.date)):
+        return str(v)
+    return v
+
+
 def _row_to_dict(cursor, row):
     """pg8000 returns plain tuples, not dict-like rows. app.py relies on
     sqlite3.Row's dict-style access (row['col'], dict(row)) everywhere, so
@@ -47,7 +61,7 @@ def _row_to_dict(cursor, row):
     if row is None:
         return None
     cols = [d[0] for d in cursor.description]
-    return dict(zip(cols, row))
+    return dict(zip(cols, (_normalize_value(v) for v in row)))
 
 
 class CompatCursor:
@@ -87,12 +101,12 @@ class CompatCursor:
 
     def fetchall(self):
         cols = [d[0] for d in self._cur.description] if self._cur.description else []
-        return [dict(zip(cols, row)) for row in self._cur.fetchall()]
+        return [dict(zip(cols, (_normalize_value(v) for v in row))) for row in self._cur.fetchall()]
 
     def __iter__(self):
         cols = [d[0] for d in self._cur.description] if self._cur.description else []
         for row in self._cur:
-            yield dict(zip(cols, row))
+            yield dict(zip(cols, (_normalize_value(v) for v in row)))
 
 
 class CompatConnection:
