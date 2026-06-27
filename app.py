@@ -1396,12 +1396,17 @@ def reset_password(token):
         if len(password) < 8:
             flash('Password must be at least 8 characters.', 'error')
             return render_template('reset_password.html', token=token)
+        if not re.search(r'[A-Za-z]', password) or not re.search(r'[0-9]', password):
+            flash('Password must contain at least one letter and one number.', 'error')
+            return render_template('reset_password.html', token=token)
         if password != confirm:
             flash('Passwords do not match.', 'error')
             return render_template('reset_password.html', token=token)
         db.execute('UPDATE users SET password_hash=?, reset_token=NULL, reset_token_expiry=NULL WHERE id=?',
                    (generate_password_hash(password), user['id']))
         db.commit()
+        # Invalidate any active sessions for this user after password reset
+        log_activity('Password Reset', f"User #{user['id']} reset their password")
         flash('Password reset successfully. Please login.', 'success')
         return redirect(url_for('login'))
     return render_template('reset_password.html', token=token)
