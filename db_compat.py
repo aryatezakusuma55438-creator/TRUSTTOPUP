@@ -73,6 +73,10 @@ class CompatCursor:
         self._cur = raw_cursor
         self.lastrowid = None
 
+    @property
+    def rowcount(self):
+        return self._cur.rowcount
+
     def execute(self, query, params=()):
         pg_query = _to_pg_params(translate_schema(query))
         self._cur.execute(pg_query, params)
